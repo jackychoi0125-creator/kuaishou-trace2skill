@@ -1,0 +1,66 @@
+_base_: ../_base_/default.yaml
+
+model:
+  optimizer_backend: openai_compatible
+  target_backend: openai_compatible  # descriptive; HarborPiAdapter never calls SkillOpt chat_target
+  optimizer: ep-j0kopj-1791798755291829540
+  target: ep-0lh2e2-1791798733636675306
+  optimizer_openai_compatible_model: ep-j0kopj-1791798755291829540
+  target_openai_compatible_model: ep-0lh2e2-1791798733636675306
+  optimizer_openai_compatible_base_url: https://proxy-configure-before-run.invalid/v1
+  target_openai_compatible_base_url: https://proxy-configure-before-run.invalid/v1
+  optimizer_openai_compatible_temperature: 0.2
+  optimizer_openai_compatible_completion_token_field: max_completion_tokens
+  optimizer_openai_compatible_thinking: enabled
+  optimizer_openai_compatible_reasoning_effort: high
+  optimizer_openai_compatible_max_tokens: 90000
+  target_openai_compatible_completion_token_field: max_tokens
+  target_openai_compatible_thinking: disabled
+  target_openai_compatible_reasoning_effort: none
+  target_openai_compatible_max_tokens: 65536
+
+train:
+  num_epochs: 1
+  train_size: 0
+  batch_size: 80
+  accumulation: 1
+  seed: 42
+
+gradient:
+  minibatch_size: 8
+  merge_batch_size: 8
+  analyst_workers: 4
+  failure_only: false
+
+optimizer:
+  learning_rate: 1
+  lr_scheduler: constant
+  skill_update_mode: patch
+  risk_aware_selection: true
+  success_failure_contrast: true
+  max_edits_per_candidate: 1
+  trace_compaction: deterministic_evidence_preserving
+  rejected_candidate_recovery: bounded_search
+  use_slow_update: false
+  use_meta_skill: false
+
+evaluation:
+  use_gate: true
+  gate_metric: hard
+  strict_best_accuracy_gate: true
+  train_regression_tolerance: 0.05
+  max_candidates: 3
+  generation_token_budget: 900000
+  eval_test: false
+  sel_env_num: 40
+  test_env_num: 0
+
+env:
+  name: harbor_pi
+  skill_init: src/skillopt/envs/harbor_pi/skills/initial.md
+  split_mode: split_dir
+  split_dir: ../../spreadsheetbench-harbor-kit-v3.3-layout2/benchmark/splits
+  kit_root: ../../spreadsheetbench-harbor-kit-v3.3-layout2
+  jobs_root: outputs/harbor_pi/jobs
+  mode: harbor
+  max_completion_tokens: 90000

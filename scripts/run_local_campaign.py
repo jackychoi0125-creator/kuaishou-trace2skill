@@ -16,10 +16,22 @@ import sys
 from pathlib import Path
 
 HERE = Path(__file__).resolve()
-SKILLOPT = HERE.parents[2]
-WORKSPACE = HERE.parents[3]
-KIT = WORKSPACE / "spreadsheetbench-harbor-kit-v3.3-layout2"
-TRACE2SKILL = SKILLOPT / "submission/scripts/trace2skill.py"
+SUBMISSION = HERE.parents[1]
+
+
+def _find_workspace() -> Path:
+    configured = os.environ.get("TRACE2SKILL_WORKSPACE")
+    if configured:
+        return Path(configured).expanduser().resolve()
+    for parent in (SUBMISSION, *SUBMISSION.parents):
+        if (parent / "model.txt").is_file():
+            return parent
+    return SUBMISSION.parent
+
+
+WORKSPACE = _find_workspace()
+KIT = Path(os.environ.get("HARBOR_KIT_ROOT", WORKSPACE / "spreadsheetbench-harbor-kit-v3.3-layout2")).expanduser().resolve()
+TRACE2SKILL = SUBMISSION / "scripts/trace2skill.py"
 
 
 def _assignments(path: Path) -> dict[str, str]:
@@ -167,7 +179,7 @@ def main() -> None:
     # Verify public model IDs against the active Round 1 config before any call.
     import yaml
 
-    public = yaml.safe_load((SKILLOPT / "configs/harbor_pi/default.yaml").read_text(encoding="utf-8"))["model"]
+    public = yaml.safe_load((SUBMISSION / "configs/harbor_pi/default.yaml").read_text(encoding="utf-8"))["model"]
     expected = {
         "kimi-k2.6": str(public["optimizer_openai_compatible_model"]),
         "deepseek-v4-flash": str(public["target_openai_compatible_model"]),
@@ -188,8 +200,14 @@ def main() -> None:
     env = os.environ.copy()
 
     # Live probes verify target tool calls/thinking-off and Kimi thinking-on/90K.
-    sys.path.insert(0, str(SKILLOPT))
-    from submission.scripts.trace2skill import model_check  # noqa: PLC0415
+    import importlib.util
+
+    spec = importlib.util.spec_from_file_location("trace2skill_submission_cli", TRACE2SKILL)
+    if spec is None or spec.loader is None:
+        raise RuntimeError("cannot load submission CLI")
+    cli = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(cli)
+    model_check = cli.model_check
 
     model_report_path = run_root / "model_config_report.json"
     if model_report_path.is_file():
@@ -247,7 +265,7 @@ def main() -> None:
         print(f"smoke did not qualify for training; see {run_root / 'smoke_audit.json'}")
         raise SystemExit(2)
 
-    train_trace = WORKSPACE / "spreadsheetbench-harbor-kit-v3.3-layout2/workspace/traces/train-baseline-nothink.jsonl"
+    train_trace = KIT / "workspace/traces/train-baseline-nothink.jsonl"
     if not train_trace.is_file():
         raise FileNotFoundError("saved DeepSeek Thinking OFF Train baseline Trace is missing")
     campaign_command = [

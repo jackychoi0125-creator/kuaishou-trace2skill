@@ -4,33 +4,39 @@ This is the competition submission package for evolving standard Agent Skills fr
 
 ## Package contents
 
-- `src/trace2skill/`: contrastive reflection, patch risk screening, bounded campaign orchestration, and recovery helpers.
-- `../skillopt/envs/harbor_pi/`: Harbor rollout, ATIF conversion, task loading, Skill packaging, and model/security adapters.
-- `../configs/harbor_pi/default.yaml`: role-specific model and Harbor configuration.
+- `src/skillopt/`: vendored native SkillOpt core, including its Reflect, Aggregate, Select, Update, model backends, optimizer, evaluation, and engine modules.
+- `src/scripts/`: native SkillOpt training/evaluation entry points.
+- `src/skillopt/envs/harbor_pi/`: Harbor rollout, ATIF conversion, task loading, Skill packaging, and model/security adapters.
+- `src/trace2skill/`: contrastive reflection extensions, patch risk screening, bounded campaign orchestration, and recovery helpers.
+- `configs/harbor_pi/default.yaml`: role-specific model and Harbor configuration.
 - `skills/best/spreadsheet-workflow/SKILL.md`: current competition Best Skill. Its SHA256 is recorded in the active experiment manifest.
 - `scripts/trace2skill.py`: command line for model checks, baseline/rollout, trace conversion, evolution, search, evaluation, export, token reports, and comparisons.
 - `results/C001-20261019-delivery/`: the curated C001 optimizer artifacts and official Harbor Train/Val evidence included in this repository snapshot.
 
 ## Reproduction boundary
 
-The `submission/` directory is the competition deliverable, but it is not a standalone Python distribution by itself. It imports the modified SkillOpt package and Harbor adapter from the repository root and expects the official Harbor Kit v3.3-layout2 checkout, its dataset/manifests, and the activated runtime to be available in the surrounding workspace. For code reproduction, clone the complete repository (not only this subdirectory) and place/use the official Kit in the documented sibling workspace layout. Model credentials are intentionally runtime-provided and are not included; the organizer must supply authorized endpoint credentials/configuration. The C001 score and traces in `results/C001-20261019-delivery/` are included for audit without requiring live model access.
+This directory contains the optimizer and Harbor adapter source needed to reproduce the algorithm; it does not depend on the parent SkillOpt checkout. Its Python dependencies are declared in `pyproject.toml`. The official Harbor Kit v3.3-layout2, benchmark dataset/manifests, and authorized runtime endpoint credentials remain external competition inputs and are not copied into this package. Set `HARBOR_KIT_ROOT` to the official Kit path and `TRACE2SKILL_WORKSPACE` to the directory containing it when the default sibling layout is unavailable. Credentials are runtime-provided and are not included. The C001 score and traces in `results/C001-20261019-delivery/` are included for audit without live model access.
+
+The vendored native SkillOpt code is based on Microsoft's commit `343db229dbd5ddaf9df6b1d5540d8bcdb2604d5c`, with the project integration snapshot identified in `UPSTREAM_SKILLOPT.md`; see that file and `LICENSE` for provenance. Trace2Skill-specific changes are in `src/trace2skill/` and the Harbor integration under `src/skillopt/envs/harbor_pi/`.
 
 ## Reproduction
 
-Run commands from the workspace root with the project environment active:
+From this directory, install the submitted package and inspect the CLI:
 
 ```bash
-source rsi/bin/activate
-python SkillOpt/submission/scripts/trace2skill.py --help
+python -m venv .venv
+source .venv/bin/activate
+python -m pip install -e '.[dev]'
+python scripts/trace2skill.py --help
 ```
 
 The bounded campaign command reuses the existing official no-thinking Train trace for the initial Reflect pass, then performs a fresh current-Best Train rollout for regression screening. Only candidates passing the configured Train screen proceed to the full official Val gate:
 
 ```bash
-source rsi/bin/activate
-python SkillOpt/submission/scripts/trace2skill.py search \
-  --run-root SkillOpt/submission/results/<unique-run-id> \
-  --initial-train-trace spreadsheetbench-harbor-kit-v3.3-layout2/workspace/traces/train-baseline-nothink.jsonl \
+export HARBOR_KIT_ROOT=/path/to/spreadsheetbench-harbor-kit-v3.3-layout2
+python scripts/trace2skill.py search \
+  --run-root results/<unique-run-id> \
+  --initial-train-trace "$HARBOR_KIT_ROOT/workspace/traces/train-baseline-nothink.jsonl" \
   --max-candidates 2 --token-budget 900000
 ```
 
@@ -54,11 +60,11 @@ C001 optimizer usage is marked incomplete because the Reflect response usage was
 
 ## Tests
 
-From the workspace root:
+From this directory:
 
 ```bash
-source rsi/bin/activate
-pytest -q SkillOpt/tests
+source .venv/bin/activate
+pytest -q tests
 ```
 
 The full offline SkillOpt suite has passed in the SkillOpt checkout. Harbor integration checks and live model/Harbor smoke evidence are recorded under `results/upgrade-20261018-live-b/`. Offline tests do not establish benchmark score improvement; only the official paired Val gate does.

@@ -14,11 +14,34 @@ import sys
 import time
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[2]
-WORKSPACE = ROOT.parent
-KIT = WORKSPACE / "spreadsheetbench-harbor-kit-v3.3-layout2"
-sys.path.insert(0, str(ROOT))
-sys.path.insert(0, str(ROOT / "submission/src"))
+ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT / "src"))
+
+
+def _find_workspace() -> Path:
+    configured = os.environ.get("TRACE2SKILL_WORKSPACE")
+    if configured:
+        return Path(configured).expanduser().resolve()
+    for parent in (ROOT, *ROOT.parents):
+        if (parent / "spreadsheetbench-harbor-kit-v3.3-layout2").is_dir():
+            return parent
+    return ROOT.parent
+
+
+WORKSPACE = _find_workspace()
+KIT = Path(os.environ.get("HARBOR_KIT_ROOT", WORKSPACE / "spreadsheetbench-harbor-kit-v3.3-layout2")).expanduser().resolve()
+
+
+def _skillopt_revision() -> str:
+    provenance = ROOT / "UPSTREAM_SKILLOPT.md"
+    if provenance.is_file():
+        for line in provenance.read_text(encoding="utf-8").splitlines():
+            if line.startswith("Vendored project snapshot:"):
+                return line.partition(":")[2].strip()
+    try:
+        return subprocess.check_output(["git", "-C", str(ROOT), "rev-parse", "HEAD"], text=True).strip()
+    except (OSError, subprocess.CalledProcessError):
+        return "unknown-vendored-revision"
 
 from skillopt.envs.harbor_pi.rollout import HarborKitRollout  # noqa: E402
 from skillopt.envs.harbor_pi.security import assert_real_run_ready, proxy_credentials  # noqa: E402
@@ -362,7 +385,7 @@ def evolve(args: argparse.Namespace) -> dict:
     initial_path = Path(args.initial_skill).resolve() if args.initial_skill else None
     if initial_path is None:
         best_path = run_dir.parent / "best/best_skill.md"
-        initial_path = best_path if best_path.is_file() else ROOT / "skillopt/envs/harbor_pi/skills/initial.md"
+        initial_path = best_path if best_path.is_file() else ROOT / "src/skillopt/envs/harbor_pi/skills/initial.md"
     initial = initial_path.read_text(encoding="utf-8")
     candidate_id = run_dir.name
     if not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9._-]{0,80}", candidate_id):
@@ -443,7 +466,7 @@ def evolve(args: argparse.Namespace) -> dict:
         "candidate_id": candidate_id,
         "benchmark": "spreadsheetbench",
         "seed": 42,
-        "skillopt_revision": subprocess.check_output(["git", "-C", str(ROOT), "rev-parse", "HEAD"], text=True).strip(),
+        "skillopt_revision": _skillopt_revision(),
         "target_model_id": models["deepseek-v4-flash"],
         "target_thinking": "off",
         "optimizer_model_id": models["kimi-k2.6"],
@@ -473,7 +496,7 @@ def _seed_best_from_initial(best_root: Path, val_accuracy: float) -> None:
     best_skill = best_root / "best_skill.md"
     if best_skill.is_file():
         return
-    initial_skill = ROOT / "skillopt/envs/harbor_pi/skills/initial.md"
+    initial_skill = ROOT / "src/skillopt/envs/harbor_pi/skills/initial.md"
     initial_text = initial_skill.read_text(encoding="utf-8")
     best_root.mkdir(parents=True, exist_ok=True)
     shutil.copy2(initial_skill, best_skill)
@@ -665,9 +688,9 @@ def _search_initialize_best(run_root: Path) -> Path:
     best_root = run_root / "best"
     best_skill = best_root / "best_skill.md"
     if not best_skill.is_file():
-        source = ROOT / "submission/skills/best/spreadsheet-workflow/SKILL.md"
+        source = ROOT / "skills/best/spreadsheet-workflow/SKILL.md"
         if not source.is_file():
-            source = ROOT / "skillopt/envs/harbor_pi/skills/initial.md"
+            source = ROOT / "src/skillopt/envs/harbor_pi/skills/initial.md"
         best_root.mkdir(parents=True, exist_ok=True)
         shutil.copy2(source, best_skill)
     text = best_skill.read_text(encoding="utf-8")
@@ -840,7 +863,7 @@ def search_candidates(args: argparse.Namespace) -> list[dict]:
 
 
 def run_pipeline(run_id: str) -> None:
-    model_check(ROOT / "submission/results/model_config_report.json")
+    model_check(ROOT / "results/model_config_report.json")
     print("model checks passed; starting 3-task Harbor/Pi smoke")
     smoke_dir = KIT / "workspace/runs" / f"train-smoke-nothink-{run_id}"
     code = subprocess.call(
@@ -864,11 +887,11 @@ def run_pipeline(run_id: str) -> None:
         code = run_baseline(split, jobs)
         if code:
             raise SystemExit(f"{split} baseline failed (exit={code})")
-    run_dir = ROOT / "submission/results" / run_id
+    run_dir = ROOT / "results" / run_id
     args = argparse.Namespace(
         run_dir=str(run_dir),
         train_trace=None,
-        initial_skill=str(ROOT / "skillopt/envs/harbor_pi/skills/initial.md"),
+        initial_skill=str(ROOT / "src/skillopt/envs/harbor_pi/skills/initial.md"),
         minibatch_size=8,
         edit_budget=3,
         failure_only=False,
@@ -893,7 +916,7 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     sub = parser.add_subparsers(dest="command", required=True)
     check = sub.add_parser("model-check")
-    check.add_argument("--out", default=str(ROOT / "submission/results/model_config_report.json"))
+    check.add_argument("--out", default=str(ROOT / "results/model_config_report.json"))
     base = sub.add_parser("baseline")
     base.add_argument("--split", choices=["train", "val"], required=True)
     base.add_argument("--jobs-dir", required=True)
