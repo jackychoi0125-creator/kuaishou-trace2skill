@@ -9,7 +9,11 @@ This is the competition submission package for evolving standard Agent Skills fr
 - `../configs/harbor_pi/default.yaml`: role-specific model and Harbor configuration.
 - `skills/best/spreadsheet-workflow/SKILL.md`: current competition Best Skill. Its SHA256 is recorded in the active experiment manifest.
 - `scripts/trace2skill.py`: command line for model checks, baseline/rollout, trace conversion, evolution, search, evaluation, export, token reports, and comparisons.
-- `results/`: immutable prior experiments and the current `upgrade-20261018-live-b` campaign.
+- `results/C001-20261019-delivery/`: the curated C001 optimizer artifacts and official Harbor Train/Val evidence included in this repository snapshot.
+
+## Reproduction boundary
+
+The `submission/` directory is the competition deliverable, but it is not a standalone Python distribution by itself. It imports the modified SkillOpt package and Harbor adapter from the repository root and expects the official Harbor Kit v3.3-layout2 checkout, its dataset/manifests, and the activated runtime to be available in the surrounding workspace. For code reproduction, clone the complete repository (not only this subdirectory) and place/use the official Kit in the documented sibling workspace layout. Model credentials are intentionally runtime-provided and are not included; the organizer must supply authorized endpoint credentials/configuration. The C001 score and traces in `results/C001-20261019-delivery/` are included for audit without requiring live model access.
 
 ## Reproduction
 
