@@ -1,0 +1,20 @@
+{
+  "candidate_id": "C001-best-train",
+  "split": "train",
+  "job_dir": "<workspace>/SkillOpt/submission/results/upgrade-20261018-live-b/campaign/harbor-jobs/C001-best-train/train/20261018-153350-127251000/2026-10-18__15-33-58",
+  "trace_file": "<workspace>/SkillOpt/submission/results/upgrade-20261018-live-b/campaign/harbor-jobs/C001-best-train/train/20261018-153350-127251000/2026-10-18__15-33-58/traces.jsonl",
+  "skill_dir": "<workspace>/SkillOpt/submission/results/upgrade-20261018-live-b/campaign/best/skills",
+  "candidate_sha256": "640081ba5d054bcb67f2fa500b1618ac6289803f2a23dee65e46f2599ca84109",
+  "complete": true,
+  "target_model_role": "Harbor LocalPi / DeepSeek V4 Flash",
+  "thinking": "off",
+  "recovered_from_official_harbor_result": true,
+  "recovery_evidence": {
+    "harbor_finished_at": "2026-10-18T19:52:54.209218",
+    "expected_trials": 80,
+    "completed_trials": 80,
+    "errored_trials": 0,
+    "trace_records": 80,
+    "summary": "<workspace>/SkillOpt/submission/results/upgrade-20261018-live-b/campaign/harbor-jobs/C001-best-train/train/20261018-153350-127251000/2026-10-18__15-33-58/summary.json"
+  }
+}

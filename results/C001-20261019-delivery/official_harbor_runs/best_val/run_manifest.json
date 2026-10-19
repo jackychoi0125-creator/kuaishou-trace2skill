@@ -1,0 +1,12 @@
+{
+  "candidate_id": "best-init-val-640081ba5d05",
+  "split": "val",
+  "job_dir": "<workspace>/SkillOpt/submission/results/upgrade-20261018-live-b/campaign/harbor-jobs/best-init-val-640081ba5d05/val/20261018-141100-975786000/2026-10-18__14-11-08",
+  "trace_file": "<workspace>/SkillOpt/submission/results/upgrade-20261018-live-b/campaign/harbor-jobs/best-init-val-640081ba5d05/val/20261018-141100-975786000/2026-10-18__14-11-08/traces.jsonl",
+  "skill_dir": "<workspace>/SkillOpt/submission/results/upgrade-20261018-live-b/campaign/best/skills",
+  "candidate_sha256": "640081ba5d054bcb67f2fa500b1618ac6289803f2a23dee65e46f2599ca84109",
+  "complete": true,
+  "target_model_role": "Harbor LocalPi / DeepSeek V4 Flash",
+  "thinking": "off",
+  "wall_time_seconds": 4969.12
+}

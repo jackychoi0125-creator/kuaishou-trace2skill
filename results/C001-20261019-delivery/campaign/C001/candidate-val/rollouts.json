@@ -1,0 +1,402 @@
+[
+  {
+    "id": "12864",
+    "hard": 0,
+    "soft": 0.0,
+    "fail_reason": "",
+    "task_description": "Task family: formula",
+    "task_type": "spreadsheet/formula",
+    "n_turns": 8,
+    "trace_path": "<workspace>/SkillOpt/submission/results/upgrade-20261018-live-b/campaign/C001/candidate-val/predictions/12864/conversation.json"
+  },
+  {
+    "id": "142-12",
+    "hard": 1,
+    "soft": 1.0,
+    "fail_reason": "",
+    "task_description": "Task family: formula",
+    "task_type": "spreadsheet/formula",
+    "n_turns": 4,
+    "trace_path": "<workspace>/SkillOpt/submission/results/upgrade-20261018-live-b/campaign/C001/candidate-val/predictions/142-12/conversation.json"
+  },
+  {
+    "id": "227-40",
+    "hard": 1,
+    "soft": 1.0,
+    "fail_reason": "",
+    "task_description": "Task family: formula",
+    "task_type": "spreadsheet/formula",
+    "n_turns": 4,
+    "trace_path": "<workspace>/SkillOpt/submission/results/upgrade-20261018-live-b/campaign/C001/candidate-val/predictions/227-40/conversation.json"
+  },
+  {
+    "id": "267-18",
+    "hard": 1,
+    "soft": 1.0,
+    "fail_reason": "",
+    "task_description": "Task family: formula",
+    "task_type": "spreadsheet/formula",
+    "n_turns": 5,
+    "trace_path": "<workspace>/SkillOpt/submission/results/upgrade-20261018-live-b/campaign/C001/candidate-val/predictions/267-18/conversation.json"
+  },
+  {
+    "id": "2768",
+    "hard": 1,
+    "soft": 1.0,
+    "fail_reason": "",
+    "task_description": "Task family: formula",
+    "task_type": "spreadsheet/formula",
+    "n_turns": 3,
+    "trace_path": "<workspace>/SkillOpt/submission/results/upgrade-20261018-live-b/campaign/C001/candidate-val/predictions/2768/conversation.json"
+  },
+  {
+    "id": "31628",
+    "hard": 1,
+    "soft": 1.0,
+    "fail_reason": "",
+    "task_description": "Task family: formula",
+    "task_type": "spreadsheet/formula",
+    "n_turns": 5,
+    "trace_path": "<workspace>/SkillOpt/submission/results/upgrade-20261018-live-b/campaign/C001/candidate-val/predictions/31628/conversation.json"
+  },
+  {
+    "id": "37378",
+    "hard": 1,
+    "soft": 1.0,
+    "fail_reason": "",
+    "task_description": "Task family: formula",
+    "task_type": "spreadsheet/formula",
+    "n_turns": 4,
+    "trace_path": "<workspace>/SkillOpt/submission/results/upgrade-20261018-live-b/campaign/C001/candidate-val/predictions/37378/conversation.json"
+  },
+  {
+    "id": "37456",
+    "hard": 1,
+    "soft": 1.0,
+    "fail_reason": "",
+    "task_description": "Task family: formula",
+    "task_type": "spreadsheet/formula",
+    "n_turns": 16,
+    "trace_path": "<workspace>/SkillOpt/submission/results/upgrade-20261018-live-b/campaign/C001/candidate-val/predictions/37456/conversation.json"
+  },
+  {
+    "id": "382-10",
+    "hard": 1,
+    "soft": 1.0,
+    "fail_reason": "",
+    "task_description": "Task family: formula",
+    "task_type": "spreadsheet/formula",
+    "n_turns": 5,
+    "trace_path": "<workspace>/SkillOpt/submission/results/upgrade-20261018-live-b/campaign/C001/candidate-val/predictions/382-10/conversation.json"
+  },
+  {
+    "id": "38462",
+    "hard": 1,
+    "soft": 1.0,
+    "fail_reason": "",
+    "task_description": "Task family: formula",
+    "task_type": "spreadsheet/formula",
+    "n_turns": 5,
+    "trace_path": "<workspace>/SkillOpt/submission/results/upgrade-20261018-live-b/campaign/C001/candidate-val/predictions/38462/conversation.json"
+  },
+  {
+    "id": "39046",
+    "hard": 0,
+    "soft": 0.0,
+    "fail_reason": "",
+    "task_description": "Task family: formula",
+    "task_type": "spreadsheet/formula",
+    "n_turns": 3,
+    "trace_path": "<workspace>/SkillOpt/submission/results/upgrade-20261018-live-b/campaign/C001/candidate-val/predictions/39046/conversation.json"
+  },
+  {
+    "id": "395-36",
+    "hard": 1,
+    "soft": 1.0,
+    "fail_reason": "",
+    "task_description": "Task family: formula",
+    "task_type": "spreadsheet/formula",
+    "n_turns": 5,
+    "trace_path": "<workspace>/SkillOpt/submission/results/upgrade-20261018-live-b/campaign/C001/candidate-val/predictions/395-36/conversation.json"
+  },
+  {
+    "id": "402-43",
+    "hard": 1,
+    "soft": 1.0,
+    "fail_reason": "",
+    "task_description": "Task family: formula",
+    "task_type": "spreadsheet/formula",
+    "n_turns": 7,
+    "trace_path": "<workspace>/SkillOpt/submission/results/upgrade-20261018-live-b/campaign/C001/candidate-val/predictions/402-43/conversation.json"
+  },
+  {
+    "id": "416-15",
+    "hard": 1,
+    "soft": 1.0,
+    "fail_reason": "",
+    "task_description": "Task family: formula",
+    "task_type": "spreadsheet/formula",
+    "n_turns": 5,
+    "trace_path": "<workspace>/SkillOpt/submission/results/upgrade-20261018-live-b/campaign/C001/candidate-val/predictions/416-15/conversation.json"
+  },
+  {
+    "id": "43436",
+    "hard": 0,
+    "soft": 0.0,
+    "fail_reason": "",
+    "task_description": "Task family: formula",
+    "task_type": "spreadsheet/formula",
+    "n_turns": 7,
+    "trace_path": "<workspace>/SkillOpt/submission/results/upgrade-20261018-live-b/campaign/C001/candidate-val/predictions/43436/conversation.json"
+  },
+  {
+    "id": "45635",
+    "hard": 1,
+    "soft": 1.0,
+    "fail_reason": "",
+    "task_description": "Task family: formula",
+    "task_type": "spreadsheet/formula",
+    "n_turns": 4,
+    "trace_path": "<workspace>/SkillOpt/submission/results/upgrade-20261018-live-b/campaign/C001/candidate-val/predictions/45635/conversation.json"
+  },
+  {
+    "id": "463-17",
+    "hard": 1,
+    "soft": 1.0,
+    "fail_reason": "",
+    "task_description": "Task family: formula",
+    "task_type": "spreadsheet/formula",
+    "n_turns": 5,
+    "trace_path": "<workspace>/SkillOpt/submission/results/upgrade-20261018-live-b/campaign/C001/candidate-val/predictions/463-17/conversation.json"
+  },
+  {
+    "id": "46897",
+    "hard": 1,
+    "soft": 1.0,
+    "fail_reason": "",
+    "task_description": "Task family: formula",
+    "task_type": "spreadsheet/formula",
+    "n_turns": 5,
+    "trace_path": "<workspace>/SkillOpt/submission/results/upgrade-20261018-live-b/campaign/C001/candidate-val/predictions/46897/conversation.json"
+  },
+  {
+    "id": "47798",
+    "hard": 1,
+    "soft": 1.0,
+    "fail_reason": "",
+    "task_description": "Task family: formula",
+    "task_type": "spreadsheet/formula",
+    "n_turns": 5,
+    "trace_path": "<workspace>/SkillOpt/submission/results/upgrade-20261018-live-b/campaign/C001/candidate-val/predictions/47798/conversation.json"
+  },
+  {
+    "id": "48527",
+    "hard": 0,
+    "soft": 0.0,
+    "fail_reason": "",
+    "task_description": "Task family: formula",
+    "task_type": "spreadsheet/formula",
+    "n_turns": 5,
+    "trace_path": "<workspace>/SkillOpt/submission/results/upgrade-20261018-live-b/campaign/C001/candidate-val/predictions/48527/conversation.json"
+  },
+  {
+    "id": "48588",
+    "hard": 1,
+    "soft": 1.0,
+    "fail_reason": "",
+    "task_description": "Task family: formula",
+    "task_type": "spreadsheet/formula",
+    "n_turns": 4,
+    "trace_path": "<workspace>/SkillOpt/submission/results/upgrade-20261018-live-b/campaign/C001/candidate-val/predictions/48588/conversation.json"
+  },
+  {
+    "id": "48620",
+    "hard": 0,
+    "soft": 0.0,
+    "fail_reason": "",
+    "task_description": "Task family: formula",
+    "task_type": "spreadsheet/formula",
+    "n_turns": 2,
+    "trace_path": "<workspace>/SkillOpt/submission/results/upgrade-20261018-live-b/campaign/C001/candidate-val/predictions/48620/conversation.json"
+  },
+  {
+    "id": "48921",
+    "hard": 1,
+    "soft": 1.0,
+    "fail_reason": "",
+    "task_description": "Task family: formula",
+    "task_type": "spreadsheet/formula",
+    "n_turns": 6,
+    "trace_path": "<workspace>/SkillOpt/submission/results/upgrade-20261018-live-b/campaign/C001/candidate-val/predictions/48921/conversation.json"
+  },
+  {
+    "id": "50768",
+    "hard": 1,
+    "soft": 1.0,
+    "fail_reason": "",
+    "task_description": "Task family: formula",
+    "task_type": "spreadsheet/formula",
+    "n_turns": 11,
+    "trace_path": "<workspace>/SkillOpt/submission/results/upgrade-20261018-live-b/campaign/C001/candidate-val/predictions/50768/conversation.json"
+  },
+  {
+    "id": "51-12",
+    "hard": 0,
+    "soft": 0.0,
+    "fail_reason": "",
+    "task_description": "Task family: formula",
+    "task_type": "spreadsheet/formula",
+    "n_turns": 3,
+    "trace_path": "<workspace>/SkillOpt/submission/results/upgrade-20261018-live-b/campaign/C001/candidate-val/predictions/51-12/conversation.json"
+  },
+  {
+    "id": "53383",
+    "hard": 1,
+    "soft": 1.0,
+    "fail_reason": "",
+    "task_description": "Task family: formula",
+    "task_type": "spreadsheet/formula",
+    "n_turns": 4,
+    "trace_path": "<workspace>/SkillOpt/submission/results/upgrade-20261018-live-b/campaign/C001/candidate-val/predictions/53383/conversation.json"
+  },
+  {
+    "id": "53647",
+    "hard": 1,
+    "soft": 1.0,
+    "fail_reason": "",
+    "task_description": "Task family: formula",
+    "task_type": "spreadsheet/formula",
+    "n_turns": 8,
+    "trace_path": "<workspace>/SkillOpt/submission/results/upgrade-20261018-live-b/campaign/C001/candidate-val/predictions/53647/conversation.json"
+  },
+  {
+    "id": "54144",
+    "hard": 1,
+    "soft": 1.0,
+    "fail_reason": "",
+    "task_description": "Task family: formula",
+    "task_type": "spreadsheet/formula",
+    "n_turns": 6,
+    "trace_path": "<workspace>/SkillOpt/submission/results/upgrade-20261018-live-b/campaign/C001/candidate-val/predictions/54144/conversation.json"
+  },
+  {
+    "id": "55049",
+    "hard": 1,
+    "soft": 1.0,
+    "fail_reason": "",
+    "task_description": "Task family: formula",
+    "task_type": "spreadsheet/formula",
+    "n_turns": 14,
+    "trace_path": "<workspace>/SkillOpt/submission/results/upgrade-20261018-live-b/campaign/C001/candidate-val/predictions/55049/conversation.json"
+  },
+  {
+    "id": "55979",
+    "hard": 1,
+    "soft": 1.0,
+    "fail_reason": "",
+    "task_description": "Task family: formula",
+    "task_type": "spreadsheet/formula",
+    "n_turns": 10,
+    "trace_path": "<workspace>/SkillOpt/submission/results/upgrade-20261018-live-b/campaign/C001/candidate-val/predictions/55979/conversation.json"
+  },
+  {
+    "id": "560-12",
+    "hard": 1,
+    "soft": 1.0,
+    "fail_reason": "",
+    "task_description": "Task family: formula",
+    "task_type": "spreadsheet/formula",
+    "n_turns": 5,
+    "trace_path": "<workspace>/SkillOpt/submission/results/upgrade-20261018-live-b/campaign/C001/candidate-val/predictions/560-12/conversation.json"
+  },
+  {
+    "id": "56563",
+    "hard": 0,
+    "soft": 0.0,
+    "fail_reason": "",
+    "task_description": "Task family: formula",
+    "task_type": "spreadsheet/formula",
+    "n_turns": 2,
+    "trace_path": "<workspace>/SkillOpt/submission/results/upgrade-20261018-live-b/campaign/C001/candidate-val/predictions/56563/conversation.json"
+  },
+  {
+    "id": "59196",
+    "hard": 0,
+    "soft": 0.0,
+    "fail_reason": "",
+    "task_description": "Task family: formula",
+    "task_type": "spreadsheet/formula",
+    "n_turns": 8,
+    "trace_path": "<workspace>/SkillOpt/submission/results/upgrade-20261018-live-b/campaign/C001/candidate-val/predictions/59196/conversation.json"
+  },
+  {
+    "id": "59595",
+    "hard": 1,
+    "soft": 1.0,
+    "fail_reason": "",
+    "task_description": "Task family: formula",
+    "task_type": "spreadsheet/formula",
+    "n_turns": 6,
+    "trace_path": "<workspace>/SkillOpt/submission/results/upgrade-20261018-live-b/campaign/C001/candidate-val/predictions/59595/conversation.json"
+  },
+  {
+    "id": "6698",
+    "hard": 1,
+    "soft": 1.0,
+    "fail_reason": "",
+    "task_description": "Task family: formula",
+    "task_type": "spreadsheet/formula",
+    "n_turns": 8,
+    "trace_path": "<workspace>/SkillOpt/submission/results/upgrade-20261018-live-b/campaign/C001/candidate-val/predictions/6698/conversation.json"
+  },
+  {
+    "id": "7902",
+    "hard": 1,
+    "soft": 1.0,
+    "fail_reason": "",
+    "task_description": "Task family: formula",
+    "task_type": "spreadsheet/formula",
+    "n_turns": 10,
+    "trace_path": "<workspace>/SkillOpt/submission/results/upgrade-20261018-live-b/campaign/C001/candidate-val/predictions/7902/conversation.json"
+  },
+  {
+    "id": "80-42",
+    "hard": 0,
+    "soft": 0.0,
+    "fail_reason": "",
+    "task_description": "Task family: formula",
+    "task_type": "spreadsheet/formula",
+    "n_turns": 24,
+    "trace_path": "<workspace>/SkillOpt/submission/results/upgrade-20261018-live-b/campaign/C001/candidate-val/predictions/80-42/conversation.json"
+  },
+  {
+    "id": "8942",
+    "hard": 1,
+    "soft": 1.0,
+    "fail_reason": "",
+    "task_description": "Task family: formula",
+    "task_type": "spreadsheet/formula",
+    "n_turns": 6,
+    "trace_path": "<workspace>/SkillOpt/submission/results/upgrade-20261018-live-b/campaign/C001/candidate-val/predictions/8942/conversation.json"
+  },
+  {
+    "id": "9569",
+    "hard": 1,
+    "soft": 1.0,
+    "fail_reason": "",
+    "task_description": "Task family: formula",
+    "task_type": "spreadsheet/formula",
+    "n_turns": 9,
+    "trace_path": "<workspace>/SkillOpt/submission/results/upgrade-20261018-live-b/campaign/C001/candidate-val/predictions/9569/conversation.json"
+  },
+  {
+    "id": "9726",
+    "hard": 1,
+    "soft": 1.0,
+    "fail_reason": "",
+    "task_description": "Task family: formula",
+    "task_type": "spreadsheet/formula",
+    "n_turns": 9,
+    "trace_path": "<workspace>/SkillOpt/submission/results/upgrade-20261018-live-b/campaign/C001/candidate-val/predictions/9726/conversation.json"
+  }
+]

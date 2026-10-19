@@ -1,0 +1,34 @@
+{
+  "reasoning": "Risk-aware provenance and applicability checks passed; native SkillOpt ranking follows. [optimizer-ranked: selected 1/2 edits]",
+  "edits": [
+    {
+      "op": "replace",
+      "target": "3. Choose a method suited to the workbook. Use formulas when the workbook should remain dynamically linked; use a script or spreadsheet library for large, repeated, or structural transformations.",
+      "content": "3. Choose a method suited to the workbook. Use formulas when the workbook should remain dynamically linked; use a script or spreadsheet library for large, repeated, or structural transformations. When a script is used, compute target values in Python and write them as literals unless the task explicitly requires a formula—this avoids fragility from array-formula syntax differences, implicit-intersection behavior, or recalculation engine variations. When deleting rows, always iterate from the bottom of the sheet upward so row indices do not shift beneath you.",
+      "applicability": "All spreadsheet tasks where the agent writes a script (openpyxl/pandas) to modify cell values or delete rows.",
+      "non_applicability": "Tasks that explicitly require writing Excel formulas for dynamic linkage, or tasks that only read data without structural modifications.",
+      "expected_effect": "More reliable value writing by avoiding formula recalculation ambiguity, and correct row deletion without index-shift errors.",
+      "regression_risk": "high",
+      "source_case_ids": [
+        "10452",
+        "10747",
+        "108-24",
+        "141-20",
+        "165-23",
+        "1818",
+        "192-22",
+        "194-19"
+      ],
+      "source_type": "success",
+      "patch_id": "p-1a97bc237a14",
+      "success_counterexamples": [],
+      "proposed_edit": "3. Choose a method suited to the workbook. Use formulas when the workbook should remain dynamically linked; use a script or spreadsheet library for large, repeated, or structural transformations. When a script is used, compute target values in Python and write them as literals unless the task explicitly requires a formula—this avoids fragility from array-formula syntax differences, implicit-intersection behavior, or recalculation engine variations. When deleting rows, always iterate from the bottom of the sheet upward so row indices do not shift beneath you."
+    }
+  ],
+  "ranking_details": {
+    "reasoning": "Edit 0 addresses two widespread, recurring failure patterns that are absent from the current skill: (1) fragility introduced by injecting formulas via scripts (array-formula syntax differences, implicit intersection, and engine variations) and (2) index-shifting bugs during row deletion. It fills a major implementation gap with clear, actionable guidance. Edit 1 is valuable but elaborates on an existing validation step and is more tightly coupled to specific tooling (e.g., `data_only=True`), giving it lower complementarity and generality compared to Edit 0.",
+    "selected_indices": [
+      0
+    ]
+  }
+}

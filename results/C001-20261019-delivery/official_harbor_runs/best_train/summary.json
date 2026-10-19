@@ -1,0 +1,16 @@
+{
+  "job": "SkillOpt/submission/results/upgrade-20261018-live-b/campaign/harbor-jobs/C001-best-train/train/20261018-153350-127251000/2026-10-18__15-33-58",
+  "n_trials": 80,
+  "passed": 62,
+  "failed": 18,
+  "errors": 0,
+  "accuracy": 0.775,
+  "wall_sec": 15534,
+  "input_tokens": 6499132,
+  "cache_tokens": 5439744,
+  "output_tokens": 772975,
+  "reasoning_tokens": 0,
+  "model_error_events": 0,
+  "model_error_trials": 0,
+  "task_exception_trials": 0
+}

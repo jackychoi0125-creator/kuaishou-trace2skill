@@ -1,0 +1,64 @@
+# Trace2Skill: Harbor + SkillOpt
+
+This is the competition submission package for evolving standard Agent Skills from Harbor Train traces and evaluating them with Harbor's fixed Pi Agent and official scorer. The target task runner remains Harbor; SkillOpt's target-model chat path is not used to solve benchmark tasks.
+
+## Package contents
+
+- `src/trace2skill/`: contrastive reflection, patch risk screening, bounded campaign orchestration, and recovery helpers.
+- `../skillopt/envs/harbor_pi/`: Harbor rollout, ATIF conversion, task loading, Skill packaging, and model/security adapters.
+- `../configs/harbor_pi/default.yaml`: role-specific model and Harbor configuration.
+- `skills/best/spreadsheet-workflow/SKILL.md`: current competition Best Skill. Its SHA256 is recorded in the active experiment manifest.
+- `scripts/trace2skill.py`: command line for model checks, baseline/rollout, trace conversion, evolution, search, evaluation, export, token reports, and comparisons.
+- `results/`: immutable prior experiments and the current `upgrade-20261018-live-b` campaign.
+
+## Reproduction
+
+Run commands from the workspace root with the project environment active:
+
+```bash
+source rsi/bin/activate
+python SkillOpt/submission/scripts/trace2skill.py --help
+```
+
+The bounded campaign command reuses the existing official no-thinking Train trace for the initial Reflect pass, then performs a fresh current-Best Train rollout for regression screening. Only candidates passing the configured Train screen proceed to the full official Val gate:
+
+```bash
+source rsi/bin/activate
+python SkillOpt/submission/scripts/trace2skill.py search \
+  --run-root SkillOpt/submission/results/<unique-run-id> \
+  --initial-train-trace spreadsheetbench-harbor-kit-v3.3-layout2/workspace/traces/train-baseline-nothink.jsonl \
+  --max-candidates 2 --token-budget 900000
+```
+
+Do not reuse a completed run root for an independent experiment. `--resume` is for continuing its own checkpointed campaign. Harbor jobs use `--concurrent 1` in the current profile to avoid shared-endpoint rate-limit interference. Val is evaluation-only and never enters Reflect. Test is intentionally excluded from development search.
+
+Useful separate operations are `model-check`, `baseline`, `convert`, `evolve`, `evaluate`, `export-best`, `tokens`, `compare`, and `pipeline`; consult `--help` for exact arguments. The current adapter validates official split membership and refuses arbitrary/partial benchmark selections.
+
+## Models and accounting
+
+The Round 1 profile assigns DeepSeek V4 Flash with Thinking OFF to the Harbor Pi target and Kimi K2.6 with Thinking ON to SkillOpt. The Kimi request uses the verified `max_completion_tokens` field with a configured ceiling of 90,000; this is a limit, not a requested output size. Model IDs and non-secret request settings are recorded in the experiment report. Credentials are supplied at runtime and are not stored in this package or experiment manifests.
+
+Optimizer generation usage is reported by stage separately from Harbor target usage. Reasoning and cached tokens are reported as subsets when the provider reports them; they are not added twice to completion/input totals. An interrupted process may leave a documented usage gap if a provider response was persisted before its in-memory usage checkpoint; such totals are marked incomplete rather than presented as exact.
+
+## C001 delivery snapshot
+
+The C001 audit bundle is `results/C001-20261019-delivery/`. The initial official Val baseline was 30/40 (0.75). C001 completed the full 40-case Harbor Val at 31/40 (0.775), with 7 fixed, 6 regressed, and net +1 case; the strict Accuracy gate provisionally accepted it. The Skill in `skills/best/spreadsheet-workflow/SKILL.md` is C001, SHA256 `5f43c165452e948a16d112e813395a1a6e2b1e5df315c4cc92f7476937eebe5b`. The gain is small and has not had repeat confirmation, so it should be treated as provisional. The bundle includes the SkillOpt patch provenance, Train screen, paired Val decision, official summaries, and ATIF Val trace.
+
+C001's Train screen was 63/80 versus the same-round prior Best's 62/80, with 11 fixed and 10 regressed cases. C001 Val had 0 Harbor errors, model-error trials, task exceptions, retries, or actual HTTP 429 responses. C001 target usage was 2,086,242 input tokens (including 1,584,896 cached-token subset), 429,494 output tokens, 0 reported reasoning tokens, 2,515,736 total, and 8,255 seconds wall time.
+
+C001 optimizer usage is marked incomplete because the Reflect response usage was not checkpointed by the process that first persisted its output. The visible 1,622 tokens cover only resumed ranking/selection work and are a lower bound, not the candidate's total generation cost. Do not use its `score_gain_per_1m_generation_tokens` field as a valid efficiency comparison. C002 work is outside this C001 delivery snapshot.
+
+## Tests
+
+From the workspace root:
+
+```bash
+source rsi/bin/activate
+pytest -q SkillOpt/tests
+```
+
+The full offline SkillOpt suite has passed in the SkillOpt checkout. Harbor integration checks and live model/Harbor smoke evidence are recorded under `results/upgrade-20261018-live-b/`. Offline tests do not establish benchmark score improvement; only the official paired Val gate does.
+
+## New benchmark support
+
+The evolution and gate logic does not depend on SpreadsheetBench's fixed sample counts or case IDs. A new benchmark requires a compatible Harbor adapter for its official split manifests and trace/task mapping, plus benchmark-specific Skill metadata. Keep Reflect, Aggregate, risk screening, native Select/Update, checkpoints, token accounting, and acceptance logic unchanged where the Kit contract permits.

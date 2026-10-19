@@ -1,0 +1,31 @@
+round: 1
+benchmark: spreadsheetbench
+harbor:
+  kit_root: ../spreadsheetbench-harbor-kit-v3.3-layout2
+  train_split: ../spreadsheetbench-harbor-kit-v3.3-layout2/benchmark/splits/train/items.json
+  val_split: ../spreadsheetbench-harbor-kit-v3.3-layout2/benchmark/splits/val/items.json
+  target_model: DeepSeek V4 Flash
+  thinking: disabled
+  api: openai-completions
+  concurrency: 5
+  seed: 0
+optimizer:
+  model: Kimi K2.6
+  thinking: enabled
+  reasoning_effort: high
+  max_completion_tokens: 90000
+  temperature: 0.2
+  failure_only: true
+  minibatch_size: 8
+  merge_batch_size: 8
+  analyst_workers: 4
+  edit_budget: 3
+  use_slow_update: false
+  use_meta_skill: false
+gate:
+  metric: hard
+  accept_only_if_strict_accuracy_increase: true
+isolation:
+  train_reflect_source: Harbor Train ATIF-v1.8 only
+  val_use: paired evaluation and accept/reject only
+  test_use: prohibited until final selection

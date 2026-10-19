@@ -1,0 +1,5 @@
+{
+  "eligible_count": 2,
+  "rejected": [],
+  "selection_policy": "one edit per candidate; preserve provenance and preconditions"
+}

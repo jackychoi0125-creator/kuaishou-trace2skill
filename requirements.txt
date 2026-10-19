@@ -1,0 +1,3 @@
+# The editable SkillOpt checkout supplies the runtime dependencies.
+# Development validation uses its [dev] extra (pytest and ruff).
+-e ./SkillOpt[dev]

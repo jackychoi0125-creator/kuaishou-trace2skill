@@ -1,0 +1,51 @@
+{
+  "reasoning": "Risk-aware provenance and applicability checks passed; native SkillOpt ranking follows.",
+  "edits": [
+    {
+      "op": "replace",
+      "target": "3. Choose a method suited to the workbook. Use formulas when the workbook should remain dynamically linked; use a script or spreadsheet library for large, repeated, or structural transformations.",
+      "content": "3. Choose a method suited to the workbook. Use formulas when the workbook should remain dynamically linked; use a script or spreadsheet library for large, repeated, or structural transformations. When a script is used, compute target values in Python and write them as literals unless the task explicitly requires a formula—this avoids fragility from array-formula syntax differences, implicit-intersection behavior, or recalculation engine variations. When deleting rows, always iterate from the bottom of the sheet upward so row indices do not shift beneath you.",
+      "applicability": "All spreadsheet tasks where the agent writes a script (openpyxl/pandas) to modify cell values or delete rows.",
+      "non_applicability": "Tasks that explicitly require writing Excel formulas for dynamic linkage, or tasks that only read data without structural modifications.",
+      "expected_effect": "More reliable value writing by avoiding formula recalculation ambiguity, and correct row deletion without index-shift errors.",
+      "regression_risk": "high",
+      "source_case_ids": [
+        "10452",
+        "10747",
+        "108-24",
+        "141-20",
+        "165-23",
+        "1818",
+        "192-22",
+        "194-19"
+      ],
+      "source_type": "success",
+      "patch_id": "p-1a97bc237a14",
+      "success_counterexamples": [],
+      "proposed_edit": "3. Choose a method suited to the workbook. Use formulas when the workbook should remain dynamically linked; use a script or spreadsheet library for large, repeated, or structural transformations. When a script is used, compute target values in Python and write them as literals unless the task explicitly requires a formula—this avoids fragility from array-formula syntax differences, implicit-intersection behavior, or recalculation engine variations. When deleting rows, always iterate from the bottom of the sheet upward so row indices do not shift beneath you."
+    },
+    {
+      "op": "insert_after",
+      "target": "Validate the saved workbook by reopening it, checking the target range and neighboring cells, and confirming the file is valid. Recalculate formulas with an available spreadsheet engine when formula results matter.",
+      "content": " When formulas are involved, compute expected values independently with Python or pandas and compare them to the recalculated results; force recalculation with a headless spreadsheet engine before reading back with `data_only=True` to verify.",
+      "applicability": "Any spreadsheet task that writes formulas and requires recalculation for grading or correctness.",
+      "non_applicability": "Tasks that only write static values or do not involve formula recalculation.",
+      "expected_effect": "Reduces formula logic mismatches by providing a concrete reference check before submission, and ensures the produced .xlsx evaluates correctly under the grader's recalculation pipeline.",
+      "regression_risk": "unassessed",
+      "source_case_ids": [
+        "250-20",
+        "254-34",
+        "263-1",
+        "30930",
+        "31011",
+        "31915",
+        "32023",
+        "32255"
+      ],
+      "source_type": "success",
+      "patch_id": "p-a17ad0c51943",
+      "success_counterexamples": [],
+      "proposed_edit": " When formulas are involved, compute expected values independently with Python or pandas and compare them to the recalculated results; force recalculation with a headless spreadsheet engine before reading back with `data_only=True` to verify."
+    }
+  ]
+}

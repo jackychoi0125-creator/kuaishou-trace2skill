@@ -1,0 +1,80 @@
+{
+    "id": "392cf55c-82d5-46bd-b1ae-1657bfa2c2a2",
+    "started_at": "2026-10-18T14:11:08.620389",
+    "updated_at": "2026-10-18T15:33:46.142909",
+    "finished_at": "2026-10-18T15:33:46.142909",
+    "n_total_trials": 40,
+    "stats": {
+        "n_completed_trials": 40,
+        "n_errored_trials": 0,
+        "n_running_trials": 0,
+        "n_pending_trials": 0,
+        "n_cancelled_trials": 0,
+        "n_retries": 0,
+        "evals": {
+            "pi__ep-0lh2e2-1791798733636675306__spreadsheetbench-val-instances": {
+                "n_trials": 40,
+                "n_errors": 0,
+                "metrics": [
+                    {
+                        "mean": 0.75
+                    }
+                ],
+                "pass_at_k": {},
+                "reward_stats": {
+                    "reward": {
+                        "1.0": [
+                            "45635__DjZjk4B",
+                            "227-40__5mPFLBb",
+                            "54144__C7KqMXd",
+                            "56563__ZsjqDVn",
+                            "53647__isKZpsT",
+                            "55979__V39iLdd",
+                            "12864__PMTjcqS",
+                            "382-10__XX7Jfca",
+                            "395-36__XXseHfr",
+                            "59196__thQqns5",
+                            "55049__MKDHQWH",
+                            "46897__vvq8nX9",
+                            "416-15__YM9YGMG",
+                            "8942__kjJGMLM",
+                            "38462__NiYXLLN",
+                            "51-12__aXCDydQ",
+                            "560-12__kNLdZST",
+                            "2768__uqH4Vag",
+                            "9726__4qhjHvB",
+                            "267-18__KCtNcTQ",
+                            "59595__S5pKPCF",
+                            "39046__BtfVP7L",
+                            "37378__UVQZsaj",
+                            "48620__p9SvK53",
+                            "463-17__zpADEaT",
+                            "50768__EgZkZTX",
+                            "142-12__ZXzhXgB",
+                            "53383__P2JeRsT",
+                            "402-43__THHAMyM",
+                            "6698__ecSRZwi"
+                        ],
+                        "0.0": [
+                            "48921__LtbYWJz",
+                            "31628__qRbqRWo",
+                            "9569__pTg9QMb",
+                            "37456__pVJvNSQ",
+                            "7902__79z6ExZ",
+                            "48588__yx38b9C",
+                            "47798__tZunodR",
+                            "48527__C5H6kqX",
+                            "43436__mGevYW7",
+                            "80-42__EiYAT2U"
+                        ]
+                    }
+                },
+                "exception_stats": {}
+            }
+        },
+        "n_input_tokens": 2183762,
+        "n_cache_tokens": 1755136,
+        "n_output_tokens": 249216,
+        "cost_usd": null
+    }
+}

@@ -1,0 +1,7 @@
+{
+  "split": "train",
+  "trace_file": "<workspace>/spreadsheetbench-harbor-kit-v3.3-layout2/workspace/traces/train-baseline-nothink.jsonl",
+  "sample_count": 80,
+  "ids_sha256": "c5eb753031aad2d58b60509c6b14ae202027bbe9577b2a9067aff8333da6cb27",
+  "score_source": "Harbor exported result.reward"
+}

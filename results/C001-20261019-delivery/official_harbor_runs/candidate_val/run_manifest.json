@@ -1,0 +1,12 @@
+{
+  "candidate_id": "C001",
+  "split": "val",
+  "job_dir": "<workspace>/SkillOpt/submission/results/upgrade-20261018-live-b/campaign/C001/harbor-jobs/C001/val/20261019-003351-126865000/2026-10-19__00-33-57",
+  "trace_file": "<workspace>/SkillOpt/submission/results/upgrade-20261018-live-b/campaign/C001/harbor-jobs/C001/val/20261019-003351-126865000/2026-10-19__00-33-57/traces.jsonl",
+  "skill_dir": "<workspace>/SkillOpt/submission/results/upgrade-20261018-live-b/campaign/C001/candidate/skills",
+  "candidate_sha256": "5f43c165452e948a16d112e813395a1a6e2b1e5df315c4cc92f7476937eebe5b",
+  "complete": true,
+  "target_model_role": "Harbor LocalPi / DeepSeek V4 Flash",
+  "thinking": "off",
+  "wall_time_seconds": 8278.32
+}

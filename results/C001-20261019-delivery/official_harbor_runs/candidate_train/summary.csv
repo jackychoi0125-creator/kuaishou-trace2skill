@@ -1,0 +1,81 @@
+qid,reward,input_tokens,cache_tokens,output_tokens,reasoning_tokens,model_error_events,duration_sec,exception,model_error,note
+10452,1.0,21648,16640,1500,0,0,51,False,False,
+105-24,1.0,26154,19456,1906,0,0,64,False,False,
+10747,1.0,9879,5632,997,0,0,46,False,False,
+108-24,1.0,37974,27392,3155,0,0,68,False,False,
+118-50,0.0,91693,79616,4204,0,0,87,False,False,"1_118-50_input.xlsx: value difference at Sheet1!C2: expected 'TAVERING', got 'CRELAING'"
+11842,1.0,966783,896512,17055,0,0,269,False,False,
+141-20,1.0,33680,26880,2428,0,0,60,False,False,
+165-23,1.0,30028,23040,1570,0,0,54,False,False,
+170-13,0.0,49416,28928,13803,0,0,207,False,False,1_170-13_input.xlsx: value difference at Sheet3!A2: expected 'ZPAM_FLEXI+U4_PackageDetailsRelation+U4_PackageDetailsForm
+1818,0.0,204839,187648,8740,0,0,172,False,False,"1_1818_input.xlsx: value difference at Summary!B18: expected 'MR21_065', got None"
+192-22,1.0,55234,39680,6187,0,0,108,False,False,
+194-19,1.0,468124,426752,14706,0,0,217,False,False,
+22-47,1.0,54087,37120,13922,0,0,224,False,False,
+247-24,1.0,82390,66304,5870,0,0,109,False,False,
+250-20,1.0,71421,59904,3721,0,0,83,False,False,
+254-34,1.0,41527,34816,2702,0,0,64,False,False,
+262-17,0.0,6973,2560,1102,0,0,45,False,False,agent produced no solution.py
+263-1,1.0,34690,25344,2021,0,0,57,False,False,
+30930,1.0,55347,44544,4170,0,0,85,False,False,
+31011,1.0,76358,66304,3304,0,0,72,False,False,
+31915,1.0,15926,11264,1153,0,0,47,False,False,
+32023,0.0,84469,64000,12250,0,0,174,False,False,"1_32023_input.xlsx: value difference at Sheet1!B2: expected None, got 'C78'"
+32255,1.0,20451,15616,1049,0,0,48,False,False,
+32337,1.0,247873,211456,17162,0,0,327,False,False,
+32438,0.0,5347,2304,65644,0,0,1211,False,False,agent produced no solution.py
+325-44,0.0,9003,5376,1240,0,0,48,False,False,agent produced no solution.py
+32612,1.0,47961,40192,2586,0,0,64,False,False,
+32902,1.0,73465,59136,2299,0,0,60,False,False,
+34033,1.0,51793,41728,5923,0,0,104,False,False,
+3413,1.0,468206,404736,68871,0,0,914,False,False,
+35742,1.0,149985,132352,6447,0,0,111,False,False,
+36097,0.0,160371,135168,13229,0,0,198,False,False,"1_36097_input.xlsx: value difference at Sheet1!H6: expected -50, got 50"
+370-43,1.0,200213,166912,7861,0,0,132,False,False,
+379-36,1.0,30929,23296,1671,0,0,52,False,False,
+398-14,0.0,10613,5888,65840,0,0,876,False,False,agent produced no solution.py
+39903,1.0,17618,12800,1561,0,0,49,False,False,
+39931,1.0,19316,13568,1781,0,0,54,False,False,
+408-39,1.0,70392,59392,4699,0,0,87,False,False,
+40892,1.0,43877,36352,3311,0,0,74,False,False,
+414-20,1.0,14008,10496,772,0,0,41,False,False,
+42354,0.0,5266,2304,430,0,0,40,False,False,agent produced no solution.py
+433-47,1.0,40936,31488,5475,0,0,101,False,False,
+43589,1.0,32881,22272,783,0,0,44,False,False,
+45372,1.0,25050,17664,3579,0,0,74,False,False,
+46121,1.0,76261,63744,4216,0,0,83,False,False,
+46646,0.0,5671,2560,2563,0,0,62,False,False,agent produced no solution.py
+472-15,1.0,19925,15104,1298,0,0,48,False,False,
+47766,1.0,239466,216064,8944,0,0,144,False,False,
+48080,1.0,20729,15616,2151,0,0,75,False,False,
+48365,1.0,110120,97024,6437,0,0,118,False,False,
+48745,1.0,22406,15872,2944,0,0,69,False,False,
+48983,1.0,33686,24576,3624,0,0,78,False,False,
+493-18,1.0,26669,20480,2229,0,0,57,False,False,
+49333,1.0,51763,42240,3805,0,0,89,False,False,
+50916,1.0,100926,86016,5820,0,0,104,False,False,
+51090,1.0,326778,297728,6816,0,0,170,False,False,
+51249,1.0,26192,20992,1866,0,0,56,False,False,
+52216,1.0,111185,94720,7003,0,0,115,False,False,
+54085,0.0,37224,31744,2683,0,0,71,False,False,"1_54085_input.xlsx: value difference at Sheet1!C3: expected 'Oranges', got None"
+54638,1.0,507849,477184,15128,0,0,278,False,False,
+55060,1.0,11541,7680,760,0,0,43,False,False,
+55421,1.0,80560,67840,3874,0,0,83,False,False,
+55427,0.0,334766,303616,20935,0,0,310,False,False,"1_55427_input.xlsx: value difference at Compiled and located schools da!B1420: expected None, got '#N/A'"
+55965,1.0,62235,50432,5143,0,0,95,False,False,
+56274,1.0,23012,16384,2402,0,0,62,False,False,
+56427,1.0,279613,255232,15108,0,0,227,False,False,
+56786,0.0,322718,298240,12701,0,0,197,False,False,"1_56786_input.xlsx: value difference at Sheet1!C4: expected 6.166666667559182, got None"
+57113,0.0,5229,2304,14696,0,0,239,False,False,agent produced no solution.py
+57445,1.0,20431,14592,1496,0,0,51,False,False,
+57558,1.0,180908,162048,4287,0,0,85,False,False,
+577-40,1.0,28584,20224,2360,0,0,61,False,False,
+57743,1.0,29448,21504,2685,0,0,68,False,False,
+58109,0.0,6067,3072,65682,0,0,953,False,False,agent produced no solution.py
+58484,1.0,228451,204032,11958,0,0,183,False,False,
+58499,1.0,18388,13056,1284,0,0,55,False,False,
+585-41,1.0,16349,11776,1460,0,0,53,False,False,
+58949,1.0,36002,28928,2888,0,0,69,False,False,
+6239,0.0,154062,123136,23664,0,0,337,False,False,"1_6239_input.xlsx: value difference at Sheet1!G2: expected 0.08, got 0.14"
+66-24,1.0,63333,53504,3340,0,0,75,False,False,
+82-30,1.0,32237,24576,2150,0,0,59,False,False,

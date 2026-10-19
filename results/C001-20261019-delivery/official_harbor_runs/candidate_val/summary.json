@@ -1,0 +1,16 @@
+{
+  "job": "<workspace>/SkillOpt/submission/results/upgrade-20261018-live-b/campaign/C001/harbor-jobs/C001/val/20261019-003351-126865000/2026-10-19__00-33-57",
+  "n_trials": 40,
+  "passed": 31,
+  "failed": 9,
+  "errors": 0,
+  "accuracy": 0.775,
+  "wall_sec": 8255,
+  "input_tokens": 2086242,
+  "cache_tokens": 1584896,
+  "output_tokens": 429494,
+  "reasoning_tokens": 0,
+  "model_error_events": 0,
+  "model_error_trials": 0,
+  "task_exception_trials": 0
+}
