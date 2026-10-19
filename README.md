@@ -9,7 +9,7 @@ This is the competition submission package for evolving standard Agent Skills fr
 - `src/skillopt/envs/harbor_pi/`: Harbor rollout, ATIF conversion, task loading, Skill packaging, and model/security adapters.
 - `src/trace2skill/`: contrastive reflection extensions, patch risk screening, bounded campaign orchestration, and recovery helpers.
 - `configs/harbor_pi/default.yaml`: role-specific model and Harbor configuration.
-- `skills/best/spreadsheet-workflow/SKILL.md`: current competition Best Skill. Its SHA256 is recorded in the active experiment manifest.
+- `skills/spreadsheet-workflow/SKILL.md`: current competition Best Skill. Its SHA256 is recorded in the active experiment manifest.
 - `scripts/trace2skill.py`: command line for model checks, baseline/rollout, trace conversion, evolution, search, evaluation, export, token reports, and comparisons.
 - `results/C001-20261019-delivery/`: the curated C001 optimizer artifacts and official Harbor Train/Val evidence included in this repository snapshot.
 
@@ -52,7 +52,7 @@ Optimizer generation usage is reported by stage separately from Harbor target us
 
 ## C001 delivery snapshot
 
-The C001 audit bundle is `results/C001-20261019-delivery/`. The initial official Val baseline was 30/40 (0.75). C001 completed the full 40-case Harbor Val at 31/40 (0.775), with 7 fixed, 6 regressed, and net +1 case; the strict Accuracy gate provisionally accepted it. The Skill in `skills/best/spreadsheet-workflow/SKILL.md` is C001, SHA256 `5f43c165452e948a16d112e813395a1a6e2b1e5df315c4cc92f7476937eebe5b`. The gain is small and has not had repeat confirmation, so it should be treated as provisional. The bundle includes the SkillOpt patch provenance, Train screen, paired Val decision, official summaries, and ATIF Val trace.
+The C001 audit bundle is `results/C001-20261019-delivery/`. The initial official Val baseline was 30/40 (0.75). C001 completed the full 40-case Harbor Val at 31/40 (0.775), with 7 fixed, 6 regressed, and net +1 case; the strict Accuracy gate provisionally accepted it. The Skill in `skills/spreadsheet-workflow/SKILL.md` is C001, SHA256 `5f43c165452e948a16d112e813395a1a6e2b1e5df315c4cc92f7476937eebe5b`. The gain is small and has not had repeat confirmation, so it should be treated as provisional. The bundle includes the SkillOpt patch provenance, Train screen, paired Val decision, official summaries, and ATIF Val trace.
 
 C001's Train screen was 63/80 versus the same-round prior Best's 62/80, with 11 fixed and 10 regressed cases. C001 Val had 0 Harbor errors, model-error trials, task exceptions, retries, or actual HTTP 429 responses. C001 target usage was 2,086,242 input tokens (including 1,584,896 cached-token subset), 429,494 output tokens, 0 reported reasoning tokens, 2,515,736 total, and 8,255 seconds wall time.
 

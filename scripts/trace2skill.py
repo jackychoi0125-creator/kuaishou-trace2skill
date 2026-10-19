@@ -688,7 +688,7 @@ def _search_initialize_best(run_root: Path) -> Path:
     best_root = run_root / "best"
     best_skill = best_root / "best_skill.md"
     if not best_skill.is_file():
-        source = ROOT / "skills/best/spreadsheet-workflow/SKILL.md"
+        source = ROOT / "skills/spreadsheet-workflow/SKILL.md"
         if not source.is_file():
             source = ROOT / "src/skillopt/envs/harbor_pi/skills/initial.md"
         best_root.mkdir(parents=True, exist_ok=True)
