@@ -40,6 +40,8 @@ The host-side pass-through used for the complete repeat keeps the upstream crede
 
 H006 is a separate candidate frozen from Train before H005's Val, with a single-use observation token intended to decline stale batched actions. It remains untested in official Harbor and is not the exported Best. Its next gate is the same frozen Train regression screen, followed by a full Val comparison only if qualified.
 
+After H005 was frozen and exported, `scripts/alfworld_final_test.py` was added for a one-time 134-case official Test comparison with the same H005 package and a no-Skill control. It checks the frozen hashes, writes its manifest before running, uses the same fixed target/model settings for both arms, and never updates Best or creates new patches from Test. Test scores should be reported only after both complete official runs exist and model-error checks pass.
+
 ## Limits
 
 One candidate passing Train screening does not imply generalization. Val is small and model execution is stochastic, so small gains require repeat confirmation before Best is considered final. Prior R1 and P1 experiments showed that additional instructions can regress strong native behavior and that Skill loading alone does not establish causal benefit. The system therefore prioritizes paired official scores and retains per-case evidence instead of treating readability, Skill trigger rate, or optimizer confidence as acceptance criteria.
