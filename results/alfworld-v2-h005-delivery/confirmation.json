@@ -1,0 +1,40 @@
+{
+  "candidate_id": "H005",
+  "candidate_skill_sha256": "aabcef463d4e8b65759d801d8317d0188f43dc5e2c72934de83bcf76a72857f6",
+  "attempt_label": "proxy1",
+  "prior_inconclusive_attempts": [
+    "confirmation_attempt1_inconclusive.json",
+    "confirmation_attempt2_inconclusive.json"
+  ],
+  "samples_per_run": 18,
+  "baseline_passed": [
+    16,
+    16
+  ],
+  "candidate_passed": [
+    18,
+    17
+  ],
+  "baseline_mean_accuracy": 0.8888888888888888,
+  "candidate_mean_accuracy": 0.9722222222222222,
+  "first_run_pair": {
+    "fixed_cases": [
+      "val:0016",
+      "val:0017"
+    ],
+    "regressed_cases": []
+  },
+  "repeat_pair": {
+    "fixed_cases": [
+      "val:0002",
+      "val:0016"
+    ],
+    "regressed_cases": [
+      "val:0013"
+    ]
+  },
+  "baseline_repeat_error_cases": [],
+  "candidate_repeat_error_cases": [],
+  "decision": "CONFIRMED_ACCEPT",
+  "test_executed": false
+}

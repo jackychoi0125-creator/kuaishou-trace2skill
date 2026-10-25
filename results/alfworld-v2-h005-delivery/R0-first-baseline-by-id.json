@@ -1,0 +1,33 @@
+{
+  "candidate_id": "R0",
+  "val_accuracy": 0.8888888888888888,
+  "skill_sha256": "ef26f5620673f871522b6fdf791b4b7f77c87a154dc162776bbb7fb07c9a2e42",
+  "skill_enabled": false,
+  "val_by_id": {
+    "val:0000": 1,
+    "val:0001": 1,
+    "val:0002": 1,
+    "val:0003": 1,
+    "val:0004": 1,
+    "val:0005": 1,
+    "val:0006": 1,
+    "val:0007": 1,
+    "val:0008": 1,
+    "val:0009": 1,
+    "val:0010": 1,
+    "val:0011": 1,
+    "val:0012": 1,
+    "val:0013": 1,
+    "val:0014": 1,
+    "val:0015": 1,
+    "val:0016": 0,
+    "val:0017": 0
+  },
+  "val_quality": {
+    "execution_error_trials": 0,
+    "zero_response_trials": 0,
+    "terminal_model_error_trials": 0
+  },
+  "source": "official Harbor Val baseline trace",
+  "harbor_candidate_id": "best-init-val-ef26f5620673"
+}

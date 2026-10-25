@@ -1,0 +1,16 @@
+{
+  "candidate_id": "H005",
+  "decision": "CONFIRMED_ACCEPT",
+  "skill_path": "skills/alfworld-strategy/SKILL.md",
+  "skill_sha256": "aabcef463d4e8b65759d801d8317d0188f43dc5e2c72934de83bcf76a72857f6",
+  "helper_sha256": "f058c9053a8189371e8b7fd6bc6a86fbf886ae3b43c00aad08a7f14e23c85e17",
+  "baseline_passed": [
+    16,
+    16
+  ],
+  "candidate_passed": [
+    18,
+    17
+  ],
+  "test_executed": false
+}

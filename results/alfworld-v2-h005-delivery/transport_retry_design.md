@@ -1,0 +1,7 @@
+# H005 paired confirmation: transport retry
+
+The first H005 official Val was 18/18, versus a prior no-Skill Val of 16/18. It remains provisional because independent no-Skill Train runs differed, and two attempted confirmations encountered terminal HTTP 429 responses. The second attempt scored 17/18, with `val:0013` failing after repeated 429 responses; it is retained as an infrastructure-contaminated observation and is not used to select the best run.
+
+`submission/src/trace2skill/retry_proxy.py` is a host-side OpenAI-compatible pass-through. It forwards the same POST body, model ID, Thinking OFF request fields, and response stream to the configured upstream endpoint. It retries only HTTP 429, using `Retry-After` when supplied or bounded exponential backoff, for at most six attempts. It reports request, retry, exhausted retry, error and wait counts without persisting request bodies, model responses or credentials. The Pi container receives a random one-run downstream token; the real upstream key stays in the host process. `host.docker.internal` reachability was checked from the frozen Pi image before this run.
+
+The `proxy1` attempt uses independent Harbor job directories and full official 18-case Val for both frozen H005 and no Skill, with concurrency 1 and the same proxy. Its outcome is accepted only if both runs finish without model/Harbor errors and the candidate beats no Skill in both the original and new paired comparisons. No selected-case replay, Skill edit or Kimi call occurs in this confirmation. No Test run has been started.

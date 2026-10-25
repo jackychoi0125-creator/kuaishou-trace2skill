@@ -1,0 +1,13 @@
+{
+  "job": "/Users/caijiehang/rsi/SkillOpt/submission/results/alfworld-v2-20261020-evolution/campaign/hypotheses/H005/confirmation-jobs-proxy1/R0-repeat-proxy1/val/20261025-213132-973204000/2026-10-25__21-31-37",
+  "n_trials": 18,
+  "passed": 16,
+  "failed": 2,
+  "errors": 0,
+  "recovered_model_errors": 1,
+  "accuracy": 0.8888888888888888,
+  "wall_sec": 3031,
+  "input_tokens": 2912044,
+  "cache_tokens": 2559744,
+  "output_tokens": 137542
+}

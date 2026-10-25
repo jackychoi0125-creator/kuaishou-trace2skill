@@ -1,0 +1,13 @@
+{
+  "benchmark": "ALFWorld v2",
+  "split": "official Val",
+  "candidate_id": "H005",
+  "cases": 18,
+  "test_executed": false,
+  "skill_path": "skills/alfworld-strategy/SKILL.md",
+  "skill_sha256": "aabcef463d4e8b65759d801d8317d0188f43dc5e2c72934de83bcf76a72857f6",
+  "trace_sha256": {
+    "R0-val-repeat-atif-v1.8.jsonl": "e5e299088582d104c19960c3bab9c7a5438a62e1cc9a7320576478ea57b07237",
+    "H005-val-repeat-atif-v1.8.jsonl": "e2a6d1c77467d15247a69a8dc0b530be93f43c8e2abc92278f30ac920ccea866"
+  }
+}

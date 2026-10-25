@@ -1,0 +1,11 @@
+{
+  "requests": 553,
+  "upstream_429": 0,
+  "retried_requests": 0,
+  "retry_exhausted": 0,
+  "other_upstream_errors": 1,
+  "wait_seconds": 0.0,
+  "max_attempts": 6,
+  "upstream_credential_persisted": false,
+  "request_or_response_bodies_persisted": false
+}

@@ -1,0 +1,13 @@
+{
+  "job": "submission/results/alfworld-v2-20261020-evolution/baseline/val-jobs/2026-10-23__23-19-01",
+  "n_trials": 18,
+  "passed": 16,
+  "failed": 2,
+  "errors": 0,
+  "recovered_model_errors": 0,
+  "accuracy": 0.8888888888888888,
+  "wall_sec": 3092,
+  "input_tokens": 2810944,
+  "cache_tokens": 2481664,
+  "output_tokens": 138113
+}

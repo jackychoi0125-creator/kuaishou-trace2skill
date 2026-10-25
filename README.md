@@ -9,9 +9,11 @@ This is the competition submission package for evolving standard Agent Skills fr
 - `src/skillopt/envs/harbor_pi/`: Harbor rollout, ATIF conversion, task loading, Skill packaging, and model/security adapters.
 - `src/trace2skill/`: contrastive reflection extensions, patch risk screening, bounded campaign orchestration, and recovery helpers.
 - `configs/harbor_pi/default.yaml`: role-specific model and Harbor configuration.
-- `skills/spreadsheet-workflow/SKILL.md`: current competition Best Skill. Its SHA256 is recorded in the active experiment manifest.
+- `skills/spreadsheet-workflow/SKILL.md`: Round 1 SpreadsheetBench Best Skill.
+- `skills/alfworld-strategy/SKILL.md`: repeat-confirmed Round 2 ALFWorld Best Skill, with its standard supporting script.
 - `scripts/trace2skill.py`: command line for model checks, baseline/rollout, trace conversion, evolution, search, evaluation, export, token reports, and comparisons.
 - `results/C001-20261019-delivery/`: the curated C001 optimizer artifacts and official Harbor Train/Val evidence included in this repository snapshot.
+- `results/alfworld-v2-h005-delivery/`: official 18-case paired ALFWorld Val traces, summaries, scores, model/transport cost and hashes; `results/alfworld-v2-h005-delivery.md` explains the confirmed result and limits.
 
 ## Reproduction boundary
 
@@ -107,7 +109,7 @@ python scripts/alfworld_hypothesis_val.py --candidate-id H004
 python scripts/alfworld_hypothesis_confirm.py --candidate-id H004
 ```
 
-The candidate builder refuses to overwrite an existing manifest; on this workspace, H004/H005 are already built, so resume at the diagnostic or analysis command. The Val command refuses a failed Train gate. The confirmation command refuses a candidate that did not first beat the no-Skill Val baseline and never edits the Skill. If the repeated candidate and no-Skill runs do not both show an improvement, the result remains inconclusive or rejected. Do not run Test or export a candidate as Best before that confirmation.
+The candidate builder refuses to overwrite an existing manifest; on this workspace, H004/H005 are already built, so resume at the diagnostic or analysis command. The Val command refuses a failed Train gate. The confirmation command refuses a candidate that did not first beat the no-Skill Val baseline and never edits the Skill. If the repeated candidate and no-Skill runs do not both show an improvement, the result remains inconclusive or rejected. H005 has now met that confirmation gate (18/18 and 17/18, versus 16/18 and 16/18 no Skill); it is the exported Round 2 Best. Test remains unrun.
 
 H006 is a separate, frozen Train-derived hypothesis for the observed case where Pi issues many actions in one model response. Its optional helper requires the unpredictable token from the previous public observation before sending one official action. Stale batched actions are declined and never reach the official Bridge. It preserves the original H004 Skill metadata and uses the same frozen 14-case Train subset. To build or assess it after other Harbor jobs finish:
 
@@ -135,3 +137,5 @@ python scripts/alfworld_hypothesis_confirm.py --candidate-id H005 --retry-proxy
 ```
 
 If a previous attempt was documented as incomplete due to HTTP 429, use a new `--attempt-label` such as `proxy1` to get independent Harbor directories. Each proxy attempt writes aggregate counts to `confirmation_proxy_metrics-<label>.json`; it never records model request bodies or credentials. This is a transport retry, not a way to replay selected failed tasks. Check `confirmation.json` for a complete candidate/no-Skill paired result before exporting the Skill.
+
+After a complete confirmation, `python scripts/alfworld_hypothesis_confirm_analysis.py --candidate-id H005` writes a case-paired, offline report of official rewards, Skill reads, helper calls, action counts and target output tokens. It makes no model calls and refuses partial trial sets.
