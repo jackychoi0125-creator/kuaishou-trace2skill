@@ -179,3 +179,16 @@ def test_next_candidate_reuses_only_clean_matching_full_train(tmp_path: Path):
     row["execution_error"] = True
     trace.write_text(json.dumps(row) + "\n")
     assert find_reusable(root, "C002", None, 1, 2, {"train:0001"}) is None
+
+
+def test_h005_frozen_train_gate_bundle_has_exact_case_alignment():
+    bundle = Path(__file__).resolve().parents[1] / "results/alfworld-v2-h005-delivery"
+    plan = json.loads((bundle / "train_diagnostic_plan.json").read_text())
+    guard = json.loads((bundle / "train_guard_reference.json").read_text())
+    result = json.loads((bundle / "train_diagnostic_result.json").read_text())
+    expected = set(plan["case_ids"])
+    assert len(expected) == 14
+    assert expected == set(guard["case_ids"]) == set(result["case_results"])
+    assert all(set(scores) == expected for scores in guard["prior_no_skill_by_case"].values())
+    assert sum(result["case_results"].values()) == result["official_passed"] == 13
+    assert result["passes_predeclared_train_gate"] is True

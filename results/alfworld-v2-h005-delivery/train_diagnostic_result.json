@@ -1,0 +1,49 @@
+{
+  "candidate_id": "H005",
+  "official_train_samples": 14,
+  "official_passed": 13,
+  "official_accuracy": 0.9285714285714286,
+  "baseline_passed": {
+    "C001": 11,
+    "C002": 10
+  },
+  "case_results": {
+    "train:0001": 1,
+    "train:0021": 1,
+    "train:0007": 1,
+    "train:0010": 1,
+    "train:0017": 1,
+    "train:0008": 1,
+    "train:0011": 1,
+    "train:0029": 1,
+    "train:0000": 1,
+    "train:0028": 1,
+    "train:0030": 1,
+    "train:0013": 1,
+    "train:0033": 1,
+    "train:0038": 0
+  },
+  "stable_success_regressions": [
+    "train:0038"
+  ],
+  "model_or_execution_error_cases": [],
+  "helper_adoption_cases": [
+    "train:0000",
+    "train:0001",
+    "train:0007",
+    "train:0008",
+    "train:0010",
+    "train:0011",
+    "train:0013",
+    "train:0017",
+    "train:0021",
+    "train:0028",
+    "train:0029",
+    "train:0030",
+    "train:0033",
+    "train:0038"
+  ],
+  "passes_predeclared_train_gate": true,
+  "val_executed": false,
+  "test_executed": false
+}

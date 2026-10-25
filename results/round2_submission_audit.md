@@ -9,8 +9,9 @@ Source of requirements: [official Trace2Skill rules, ALFWorld v2](https://bs3-hb
 | Official Train → Val workflow | `scripts/run_alfworld_evolution.py` uses official splits, Kimi optimizer, fixed Pi, DeepSeek Thinking OFF, and official scoring | Runnable on a configured clean Kit, but its stochastic search does not deterministically generate H005 |
 | H005 official Val evidence | Two complete paired full-Val comparisons: H005 18/18 and 17/18; no Skill 16/18 and 16/18. Complete second-pair ATIF and official summaries are bundled. | Present; this is Val evidence, not Test evidence |
 | Skill-generation token accounting | H001–H003 Kimi search: 38,751 tokens; deterministic H004/H005 package construction: 0 additional generation tokens. See H005 delivery report. | Summary present; full H001–H003 generation artifacts and source Train traces are not included in the compact public bundle |
+| H005 frozen Train gate | The 14-case predeclared plan, two no-Skill per-case guards and H005's official 13/14 diagnostic result are bundled as portable JSON snapshots. | Auditable; raw Train ATIF and a clean-checkout replay of the historical campaign are still absent |
 | Independent 134-case Test | An October 25 attempt was stopped when its candidate `--skills-dir` was found to register both the Round 1 spreadsheet Skill and Round 2 ALFWorld Skill. No no-Skill Test control had run. Its partial data is excluded. The corrected script stages only ALFWorld Skill and a new full paired run has started. | **Not yet complete; no valid Test improvement claim** |
-| Clean-checkout replay of H005 candidate-selection history | Historical `alfworld_hypothesis_*` commands require a frozen `diagnostic_plan.json` and C001/C002 Train rollout files under the local campaign directory. They are not in this compact submission. | **Not one-command reproducible**; the frozen Skill and Val evidence are inspectable |
+| Clean-checkout replay of H005 candidate-selection history | Historical `alfworld_hypothesis_*` commands require their plan and C001/C002 Train rollout files under the local campaign directory. The essential case-level evidence is bundled separately, but the commands do not automatically consume it. | **Not one-command reproducible**; the frozen Skill and evidence are inspectable |
 | New Bench reuse | Core Reflect/Aggregate/Select/Update/gate is shared; each new official Kit still needs benchmark split/task mapping and domain Skill metadata. | Partially reusable; not a zero-configuration hidden-Bench runner |
 
 ## Reproduction boundary
@@ -21,7 +22,7 @@ For the **frozen H005 package**, a reviewer can stage only `skills/alfworld-stra
 
 ## Outstanding work before claiming full formal reproducibility
 
-1. Include a portable, sanitized H005 Train diagnostic plan and its source/protected Train case evidence, then make its diagnostic and gate commands runnable from a clean checkout without C001/C002 private workspace artifacts.
+1. Make the H005 diagnostic and gate commands consume the bundled portable Train plan and case-level guard evidence, and include source Train ATIF after credential review, so an organizer can replay the full historical path without C001/C002 private workspace artifacts.
 2. Unify the deterministic, Train-derived executable-helper hypothesis into the generic candidate-generation interface, or explicitly submit it as a predeclared candidate family selected by a reproducible Train gate. The current generic SkillOpt run does not automatically invent H005.
 3. Complete the isolated official 134-case H005/no-Skill Test, inspect execution errors and paired results, and publish final ATIF, official summaries and model/optimizer token accounting. The aborted mixed-Skill attempt must not be used as evidence.
 4. Replace date-specific output roots in the campaign follow-up scripts with a configurable run root and document a clean-start versus resume path. Keep each independent run immutable.

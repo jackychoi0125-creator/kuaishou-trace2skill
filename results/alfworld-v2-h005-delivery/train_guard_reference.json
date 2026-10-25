@@ -1,0 +1,53 @@
+{
+  "split": "official Train",
+  "case_ids": [
+    "train:0000",
+    "train:0001",
+    "train:0007",
+    "train:0008",
+    "train:0010",
+    "train:0011",
+    "train:0013",
+    "train:0017",
+    "train:0021",
+    "train:0028",
+    "train:0029",
+    "train:0030",
+    "train:0033",
+    "train:0038"
+  ],
+  "prior_no_skill_by_case": {
+    "C001": {
+      "train:0000": 1,
+      "train:0001": 1,
+      "train:0007": 1,
+      "train:0008": 1,
+      "train:0010": 1,
+      "train:0011": 1,
+      "train:0013": 0,
+      "train:0017": 1,
+      "train:0021": 0,
+      "train:0028": 1,
+      "train:0029": 0,
+      "train:0030": 1,
+      "train:0033": 1,
+      "train:0038": 1
+    },
+    "C002": {
+      "train:0000": 1,
+      "train:0001": 1,
+      "train:0007": 1,
+      "train:0008": 1,
+      "train:0010": 1,
+      "train:0011": 1,
+      "train:0013": 0,
+      "train:0017": 1,
+      "train:0021": 0,
+      "train:0028": 1,
+      "train:0029": 0,
+      "train:0030": 0,
+      "train:0033": 1,
+      "train:0038": 1
+    }
+  }
+}

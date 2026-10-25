@@ -1,0 +1,33 @@
+{
+  "frozen_before_candidate_rollout": true,
+  "split": "official ALFWorld Train only",
+  "selection": "run.sh --bench alfworld-train --n 14 --seed 141",
+  "case_ids": [
+    "train:0000",
+    "train:0001",
+    "train:0007",
+    "train:0008",
+    "train:0010",
+    "train:0011",
+    "train:0013",
+    "train:0017",
+    "train:0021",
+    "train:0028",
+    "train:0029",
+    "train:0030",
+    "train:0033",
+    "train:0038"
+  ],
+  "selection_reason": "Contains all three Train cases failed in both no-skill repeats, three near-boundary success guards, and all six ALFWorld task families. The subset is diagnostic, not independent generalization evidence.",
+  "existing_no_skill_passed": {
+    "C001": 11,
+    "C002": 10
+  },
+  "train_gate": "Proceed to one full official Val only if H005 scores at least 12/14, has no execution/zero-response/terminal model error, and does not regress more than one case passed in both no-skill Train repeats.",
+  "val_gate": "Strictly exceed the clean no-skill 16/18 Val baseline; 17/18 is provisional because one case can be natural variation.",
+  "test_policy": "Run official Test once only after Best is frozen. Do not use Test cases or outcomes to generate/edit/select a Skill.",
+  "candidate_id": "H005",
+  "adoption_gate": "At least 5 of 14 official Train cases must invoke the bundled safe_send.py helper; a score without helper adoption is treated as model variation.",
+  "candidate_type": "Standard SKILL.md plus optional Skill-side script; fixed Pi and official bridge/scorer are unchanged.",
+  "controlled_factor": "H004 and H005 have identical Skill body and helper script; only frontmatter description differs."
+}
