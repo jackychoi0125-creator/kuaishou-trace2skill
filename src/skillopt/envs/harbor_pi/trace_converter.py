@@ -8,9 +8,34 @@ from pathlib import Path
 from typing import Any
 
 
-def _family_from_text(text: str) -> str:
+def normalize_case_id(case_id: Any) -> str:
+    """Map Harbor's filesystem-safe ALFWorld task name to its split ID."""
+    value = str(case_id or "")
+    match = re.fullmatch(r"(train|val|test)__(\d{4})", value)
+    return f"{match.group(1)}:{match.group(2)}" if match else value
+
+
+def terminal_model_error(trace: dict) -> str:
+    """Return the final Pi model error, ignoring recovered earlier errors."""
+    agents = [step for step in (trace.get("steps") or []) if step.get("source") == "agent"]
+    if not agents:
+        return ""
+    extra = agents[-1].get("extra") or {}
+    return str(extra.get("error") or "model_error") if extra.get("stop_reason") == "error" else ""
+
+
+def _family_from_text(text: str, task_type: str = "") -> str:
     """Coarse, benchmark-agnostic task family labels for contrastive grouping."""
     value = text.casefold()
+    declared = str(task_type or "").casefold().strip()
+    alf_families = (
+        "pick_two_obj_and_place", "pick_clean_then_place_in_recep",
+        "pick_heat_then_place_in_recep", "pick_cool_then_place_in_recep",
+        "look_at_obj_in_light", "pick_and_place_simple",
+    )
+    for family in alf_families:
+        if family in declared or family in value:
+            return family
     patterns = (
         ("formula", r"formula|function|lookup|sumif|cross.sheet|reference"),
         ("structure", r"insert|delete|move|transpose|reorder|row|column|sheet|merge|split"),
@@ -65,9 +90,9 @@ def atif_to_conversation(trace: dict) -> list[dict]:
     return conversation
 
 
-def convert_record(record: dict, out_dir: str | Path) -> dict:
+def convert_record(record: dict, out_dir: str | Path, *, task_type: str = "", benchmark: str = "spreadsheetbench") -> dict:
     trace = record.get("trace") or {}
-    task_id = str(record.get("case_id", ""))
+    task_id = normalize_case_id(record.get("case_id", ""))
     if not task_id:
         raise ValueError("Harbor trace record is missing case_id")
     conversation = atif_to_conversation(trace)
@@ -83,14 +108,23 @@ def convert_record(record: dict, out_dir: str | Path) -> dict:
         for step in (trace.get("steps") or [])
         if step.get("source") == "user"
     )
-    family = _family_from_text(user_text)
+    family = _family_from_text(user_text, task_type)
+    model_unavailable = (
+        int(record.get("input_tokens") or 0) == 0
+        and int(record.get("output_tokens") or 0) == 0
+        and not any(step.get("tool_calls") for step in (trace.get("steps") or []))
+    )
+    terminal_error = terminal_model_error(trace)
     return {
         "id": task_id,
         "hard": int(float(record.get("reward", 0)) >= 1.0),
         "soft": float(record.get("reward", 0)),
-        "fail_reason": str(record.get("execution_error") or ""),
-        "task_description": f"Task family: {family}",
-        "task_type": f"spreadsheet/{family}",
+        "execution_error": bool(record.get("execution_error")),
+        "model_unavailable": model_unavailable,
+        "terminal_model_error": bool(terminal_error),
+        "fail_reason": terminal_error or ("model_unavailable" if model_unavailable else str(record.get("execution_error") or "")),
+        "task_description": f"Benchmark: {benchmark}; task family: {family}",
+        "task_type": f"{benchmark}/{task_type or family}",
         "n_turns": sum(1 for item in conversation if item.get("role") == "assistant"),
         "trace_path": str(prediction_dir / "conversation.json"),
     }

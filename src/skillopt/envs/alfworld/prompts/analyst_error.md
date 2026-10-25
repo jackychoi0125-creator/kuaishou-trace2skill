@@ -45,11 +45,16 @@ Respond ONLY with a valid JSON object (no markdown fences, no extra text):
   "patch": {
     "reasoning": "<why these edits address the batch's common failures>",
     "edits": [
-      {"op": "append",       "content": "<markdown to add at end of skill>"},
-      {"op": "insert_after", "target": "<exact heading/text to insert after>", "content": "<markdown>"},
-      {"op": "replace",      "target": "<exact text to replace>",              "content": "<replacement>"},
-      {"op": "delete",       "target": "<exact text to remove>"}
+      {"op": "append", "content": "<markdown to add at end of skill>",
+       "source_case_ids": ["<failed Train case ID>"],
+       "success_counterexamples": ["<supplied successful Train case ID>"],
+       "applicability": "<observable task precondition>",
+       "non_applicability": "<when this rule should not be used>",
+       "expected_effect": "<observable behavior change>",
+       "regression_risk": "<specific risk to a currently successful behavior>"}
     ]
   }
 }
 Only include edits that are needed. "edits" can be an empty list if no patch is warranted.
+The object above shows one append edit; insert_after, replace, and delete remain available with the same evidence fields. Cite only supplied Train IDs. Do not copy goal object names or environment IDs into the Skill.
+Put the applicability and stop/exception conditions in the `content` itself as concise instructions: only `content` is applied to SKILL.md; the other fields are audit metadata.

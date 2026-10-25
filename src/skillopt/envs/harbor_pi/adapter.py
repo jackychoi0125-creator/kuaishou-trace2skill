@@ -57,7 +57,7 @@ class HarborPiAdapter(EnvAdapter):
         if skill_content.strip():
             # Harbor's --skills-dir is a root whose direct child folders
             # contain SKILL.md; Pi then discovers the skill recursively.
-            package_skill(skill_content, Path(out_dir) / "candidate", name="spreadsheet-workflow")
+            package_skill(skill_content, Path(out_dir) / "candidate")
             skill_dir = Path(out_dir) / "candidate"
         return self.runner.run_split(
             split,
@@ -68,4 +68,4 @@ class HarborPiAdapter(EnvAdapter):
         )
 
     def get_task_types(self) -> list[str]:
-        return ["spreadsheet"]
+        return ["alfworld"] if self.runner.benchmark == "alfworld" else ["spreadsheet"]

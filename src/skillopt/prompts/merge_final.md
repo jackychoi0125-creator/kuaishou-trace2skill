@@ -17,7 +17,7 @@ Merge guidelines:
 6. **PROTECTED SECTION**: The skill may contain a section between
    <!-- SLOW_UPDATE_START --> and <!-- SLOW_UPDATE_END --> markers.
    Do NOT merge or produce any edits that target content within these markers.
-7. Preserve source_case_ids, success_counterexamples, applicability, non_applicability, expected_effect, and regression_risk on every output edit; omit edits whose evidence/conditions cannot be preserved.
+7. Preserve patch_id, source_case_ids, success_counterexamples, applicability, non_applicability, expected_effect, and regression_risk on every output edit; omit edits whose evidence/conditions cannot be preserved. A synthesized edit may use a new patch_id but must retain source IDs.
 
 Respond ONLY with a valid JSON object:
 {
@@ -27,6 +27,13 @@ Respond ONLY with a valid JSON object:
       "op": "append|insert_after|replace|delete",
       "target": "<if needed>",
       "content": "<markdown>",
+      "patch_id": "<source or newly synthesized patch ID>",
+      "source_case_ids": ["<Train case ID>"],
+      "success_counterexamples": ["<Train success case ID, when failure-driven>"],
+      "applicability": "<precondition>",
+      "non_applicability": "<exception>",
+      "expected_effect": "<observable change>",
+      "regression_risk": "<risk>",
       "support_count": <integer>,
       "source_type": "failure|success"
     }

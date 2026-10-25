@@ -52,7 +52,14 @@ def proxy_credentials(role: str) -> ProxyCredentials:
         if not base_url or not token:
             raise RuntimeError("direct local model settings are missing")
         parsed = urlparse(base_url)
-        if parsed.scheme != "https" or not parsed.netloc or parsed.username or parsed.password:
+        local_retry_proxy = (
+            role == "target"
+            and os.environ.get("TRACE2SKILL_LOCAL_RETRY_PROXY") == "1"
+            and parsed.scheme == "http"
+            and parsed.hostname == "host.docker.internal"
+            and parsed.port is not None
+        )
+        if (not local_retry_proxy and parsed.scheme != "https") or not parsed.netloc or parsed.username or parsed.password:
             raise RuntimeError("direct local base URL must be HTTPS without embedded credentials")
         return ProxyCredentials(base_url=base_url.rstrip("/"), token=token)
     attestation = _attestation()

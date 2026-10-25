@@ -23,11 +23,15 @@ Respond ONLY with a valid JSON object:
   "patch": {
     "reasoning": "<why these patterns are worth encoding>",
     "edits": [
-      {"op": "append",       "content": "<markdown>"},
-      {"op": "insert_after", "target": "<heading/text>", "content": "<markdown>"},
-      {"op": "replace",      "target": "<old text>",     "content": "<new text>"},
-      {"op": "delete",       "target": "<exact text to remove>"}
+      {"op": "append", "content": "<markdown>",
+       "source_case_ids": ["<successful Train case ID>"],
+       "applicability": "<observable task precondition>",
+       "non_applicability": "<when this rule should not be used>",
+       "expected_effect": "<observable behavior change>",
+       "regression_risk": "<specific risk to another successful behavior>"}
     ]
   }
 }
 "edits" may be empty if the skill already covers all observed patterns.
+The object above shows one append edit; insert_after, replace, and delete remain available with the same evidence fields. Cite only supplied Train IDs. Do not copy goal object names or environment IDs into the Skill.
+Put the applicability and stop/exception conditions in the `content` itself as concise instructions: only `content` is applied to SKILL.md; the other fields are audit metadata.
