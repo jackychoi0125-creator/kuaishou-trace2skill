@@ -14,6 +14,7 @@ This is the competition submission package for evolving standard Agent Skills fr
 - `scripts/trace2skill.py`: command line for model checks, baseline/rollout, trace conversion, evolution, search, evaluation, export, token reports, and comparisons.
 - `results/C001-20261019-delivery/`: the curated C001 optimizer artifacts and official Harbor Train/Val evidence included in this repository snapshot.
 - `results/alfworld-v2-h005-delivery/`: official 18-case paired ALFWorld Val traces, summaries, scores, model/transport cost and hashes; `results/alfworld-v2-h005-delivery.md` explains the confirmed result and limits.
+- `results/round2_submission_audit.md`: rule-by-rule delivery and clean-checkout reproduction audit, including outstanding limitations.
 
 ## Reproduction boundary
 
@@ -89,7 +90,7 @@ export TRACE2SKILL_LOCAL_API_KEY=your-authorized-runtime-token
 python -u scripts/run_alfworld_evolution.py
 ```
 
-The runner resumes the completed official Train baseline, runs the full Val baseline, and starts a bounded one-edit SkillOpt candidate search. Candidate generation reads Train ATIF only. The optimizer excludes trials with an agent exception or no model response from Reflect while retaining their official scores and raw traces. A baseline with those errors cannot serve as the paired Train regression guard; a fresh full no-Skill Train rollout is run if a real candidate is produced. Val comparisons with execution or zero-response errors are marked inconclusive rather than accepted. Results and checkpoints are under `results/alfworld-v2-20261020-evolution/`. The current iteration does not run Test; a frozen best candidate must be selected before a single final Test evaluation.
+On a clean checkout, the runner creates the official Train and Val baselines, then starts a bounded one-edit SkillOpt candidate search. It resumes only artifacts already present in its own run directory. Candidate generation reads Train ATIF only. The optimizer excludes trials with an agent exception or no model response from Reflect while retaining their official scores and raw traces. A baseline with those errors cannot serve as the paired Train regression guard; a fresh full no-Skill Train rollout is run if a real candidate is produced. Val comparisons with execution or zero-response errors are marked inconclusive rather than accepted. Results and checkpoints are under `results/alfworld-v2-20261020-evolution/`. This generic search does not regenerate the frozen H005 helper automatically; H005 is a separate Train-derived operational hypothesis documented below.
 
 ### Observation-grounded hypothesis and public action guard
 
@@ -109,7 +110,22 @@ python scripts/alfworld_hypothesis_val.py --candidate-id H004
 python scripts/alfworld_hypothesis_confirm.py --candidate-id H004
 ```
 
-The candidate builder refuses to overwrite an existing manifest; on this workspace, H004/H005 are already built, so resume at the diagnostic or analysis command. The Val command refuses a failed Train gate. The confirmation command refuses a candidate that did not first beat the no-Skill Val baseline and never edits the Skill. If the repeated candidate and no-Skill runs do not both show an improvement, the result remains inconclusive or rejected. H005 has now met that confirmation gate (18/18 and 17/18, versus 16/18 and 16/18 no Skill); it is the exported Round 2 Best. Test remains unrun.
+The candidate builder refuses to overwrite an existing manifest. The Val command refuses a failed Train gate. The confirmation command refuses a candidate that did not first beat the no-Skill Val baseline and never edits the Skill. If the repeated candidate and no-Skill runs do not both show an improvement, the result remains inconclusive or rejected. H005 met that confirmation gate (18/18 and 17/18, versus 16/18 and 16/18 no Skill); it is the exported Round 2 Best. A complete, valid held-out Test comparison has not yet been produced.
+
+To independently evaluate the **frozen** H005 Skill from a clean checkout, first configure the official Kit's private `kit.env` for the same DeepSeek V4 Flash non-thinking endpoint. Then, from this package root, stage only the Round 2 Skill and run both full Val arms with the same official Kit settings:
+
+```bash
+export HARBOR_KIT_ROOT=/path/to/alfworld-v2-kit
+submission_root="$PWD"
+round2_skill_parent="$(mktemp -d)"
+cp -R skills/alfworld-strategy "$round2_skill_parent/"
+(cd "$HARBOR_KIT_ROOT" && ./run.sh --bench alfworld-val --reasoning off --concurrent 1 \
+  --jobs-dir "$submission_root/results/val-replay-no-skill-$(date +%s)")
+(cd "$HARBOR_KIT_ROOT" && ./run.sh --bench alfworld-val --reasoning off --concurrent 1 \
+  --skills-dir "$round2_skill_parent" --jobs-dir "$submission_root/results/val-replay-h005-$(date +%s)")
+```
+
+The Kit emits official `summary.json` and per-case Trial scores under each job directory. Fresh scores can differ from the supplied historical runs because model execution is stochastic. This check evaluates the submitted Skill; it does not reproduce the earlier candidate-generation decisions or use Val to generate another Patch.
 
 H006 is a separate, frozen Train-derived hypothesis for the observed case where Pi issues many actions in one model response. Its optional helper requires the unpredictable token from the previous public observation before sending one official action. Stale batched actions are declined and never reach the official Bridge. It preserves the original H004 Skill metadata and uses the same frozen 14-case Train subset. To build or assess it after other Harbor jobs finish:
 
@@ -119,7 +135,7 @@ python scripts/alfworld_hypothesis_diagnostic.py --candidate-id H006
 python scripts/alfworld_hypothesis_analysis.py --candidate-id H006
 ```
 
-Only a candidate passing its recorded Train gate may run `alfworld_hypothesis_val.py --candidate-id H006`. H006 is experimental and must not be exported as Best based on local tests or loading rate alone.
+Only a candidate passing its recorded Train gate may run `alfworld_hypothesis_val.py --candidate-id H006`. H006 is experimental and must not be exported as Best based on local tests or loading rate alone. The H004/H005 diagnostic and confirmation scripts require their predeclared `diagnostic_plan.json` and prior Train campaign rollouts under `results/alfworld-v2-20261020-evolution/`; those full local campaign artifacts are not part of this compact submission. Their historical results are auditable through the included Val bundle, but these commands are not a clean-checkout one-command replay of the original candidate search.
 
 After a candidate receives `CONFIRMED_ACCEPT` from the balanced official Val repeat, export the exact frozen Skill and supporting script to the competition's standard directory with:
 
@@ -140,4 +156,4 @@ If a previous attempt was documented as incomplete due to HTTP 429, use a new `-
 
 After a complete confirmation, `python scripts/alfworld_hypothesis_confirm_analysis.py --candidate-id H005` writes a case-paired, offline report of official rewards, Skill reads, helper calls, action counts and target output tokens. It makes no model calls and refuses partial trial sets.
 
-Once the Skill and comparison protocol are frozen, `python scripts/alfworld_final_test.py --concurrent 4` performs one complete official 134-case Test comparison of H005 and no Skill under the same model and transport conditions. It writes a run manifest before execution, refuses a second run root, and never feeds Test results into Skill generation or Best selection. The Val figures above must not be represented as Test scores.
+Once the Skill and comparison protocol are frozen, `python scripts/alfworld_final_test.py --concurrent 4` performs one complete official 134-case Test comparison of H005 and no Skill under the same model and transport conditions. It copies the frozen ALFWorld Skill and helper into an isolated parent directory so Round 1's spreadsheet Skill is not registered during Round 2. It writes a run manifest before execution, refuses a second run root, and never feeds Test results into Skill generation or Best selection. The October 25 attempt was stopped when a packaging audit found that its candidate path also exposed the Round 1 Skill; its partial data is excluded. The isolated rerun is underway. The Val figures above must not be represented as Test scores.
