@@ -130,10 +130,17 @@ class RetryProxy:
                                     self.wfile.write(chunk)
                                     self.wfile.flush()
                             return
-                    except (httpx.HTTPError, OSError) as exc:
+                    except (BrokenPipeError, ConnectionResetError, ConnectionAbortedError):
+                        # The Pi client may stop reading after its trial exits. This is
+                        # a downstream disconnect, not an upstream model failure.
+                        return
+                    except (httpx.HTTPError, OSError):
                         with proxy._lock:
                             proxy.metrics["other_upstream_errors"] += 1
-                        self.send_error(502, "upstream transport error")
+                        try:
+                            self.send_error(502, "upstream transport error")
+                        except (BrokenPipeError, ConnectionResetError, ConnectionAbortedError):
+                            pass
                         return
 
         self.server = http.server.ThreadingHTTPServer(("0.0.0.0", port), Handler)
