@@ -36,12 +36,13 @@ def analyze_trial(trial: Path, *, skill_text: str = "") -> dict:
                     loaded_step = step.get("step_id")
     errors = [str((step.get("extra") or {}).get("error") or "") for step in steps
               if (step.get("extra") or {}).get("stop_reason") == "error"]
+    terminal_error = bool(errors and steps and (steps[-1].get("extra") or {}).get("stop_reason") == "error")
     agent = result.get("agent_result") or {}
     reward = ((result.get("verifier_result") or {}).get("rewards") or {}).get("reward")
     boxed = re.findall(r"\\boxed\s*\{\s*([A-Ea-e])\s*\}", response)
     cause = "passed" if reward == 1 else (
         "agent_exception" if result.get("exception_info") else
-        "terminal_model_error" if errors else
+        "terminal_model_error" if terminal_error else
         "no_response" if not response else
         "unparsed_or_invalid_response" if not isinstance(metrics.get("parsed_answer"), str)
         or metrics["parsed_answer"] not in set("ABCDE") else
@@ -65,7 +66,8 @@ def analyze_trial(trial: Path, *, skill_text: str = "") -> dict:
         "output_tokens": int(agent.get("n_output_tokens") or 0),
         "cached_tokens_subset_of_input": int(agent.get("n_cache_tokens") or 0),
         "execution_error": bool(result.get("exception_info")),
-        "terminal_model_error": bool(errors),
+        "terminal_model_error": terminal_error,
+        "recovered_model_error_event": bool(errors and not terminal_error),
         "output_limit_reached": submission.get("finish_reason") == "length",
     }
 

@@ -1,0 +1,22 @@
+{
+  "benchmark": "livemath-v1.1",
+  "split": "test",
+  "candidate_id": "C002",
+  "skill_sha256": "df969f97395b369529e8a1274d9048e2eedfb263f94a424b9cde62cde77a1657",
+  "n_trials": 125,
+  "passed": 36,
+  "failed": 89,
+  "accuracy": 0.288,
+  "complete": true,
+  "official_grades_match": true,
+  "task_errors": 0,
+  "recovered_model_error_events": 1,
+  "wall_seconds": 3890,
+  "target_input_tokens_including_cache": 2273718,
+  "target_cached_tokens_subset_of_input": 1725952,
+  "target_output_tokens": 866298,
+  "target_total_tokens": 3140016,
+  "official_summary_sha256": "d1cee055c851028a4a606c3b1f42fb93418e95c2f8f3e646586b107b799c9776",
+  "official_comparison_sha256": "670513a965984999c43ca557c8e1b7c606b019046fdccb15bfade7c438a57ae2",
+  "test_feedback_used_for_optimization": false
+}

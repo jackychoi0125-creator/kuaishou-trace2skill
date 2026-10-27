@@ -202,4 +202,4 @@ python scripts/run_livemath_final_test.py \
   --out results/livemath-v1.1-20261027/final-test
 ```
 
-The actual local run's exact scores, error counts, token use and Test status are reported in `results/livemath-v1.1-20261027/final_experiment_report.md`. The frozen C002 Skill exceeded no Skill by 3/17 in each of two independent paired Val runs; the held-out Test result remains the final generalization check.
+The actual local run's exact scores, error counts and token use are reported in `results/livemath-v1.1-20261027/final_experiment_report.md`. The frozen C002 Skill exceeded no Skill by 3/17 in each of two independent paired Val runs, then scored **36/125 (28.8%)** on one official held-out Test. This is below the requested 80% target. A no-Skill full Test was not run, so the Test uplift over baseline is unknown. Test outcomes were not used to modify the Skill.

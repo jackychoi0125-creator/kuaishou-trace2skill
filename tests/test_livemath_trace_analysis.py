@@ -34,3 +34,24 @@ def test_official_final_response_is_scored_as_wrong_label_not_non_delivery(tmp_p
     assert row["cause"] == "scored_wrong_label"
     assert row["boxed_label_count"] == 1
     assert row["cached_tokens_subset_of_input"] == 50
+
+
+def test_recovered_model_error_does_not_mask_scored_wrong_answer(tmp_path: Path):
+    trial = tmp_path / "lm202601-3__trial"
+    for folder in ("verifier", "agent", "artifacts/bench/answers/lm202601-3"):
+        (trial / folder).mkdir(parents=True)
+    (trial / "result.json").write_text(json.dumps({
+        "task_name": "lm202601-3", "verifier_result": {"rewards": {"reward": 0.0}},
+        "agent_result": {"n_input_tokens": 100, "n_output_tokens": 30},
+    }))
+    (trial / "verifier/metrics.json").write_text(json.dumps({"parsed_answer": "C"}))
+    (trial / "agent/submission.json").write_text(json.dumps({"finish_reason": "stop", "response_bytes": 9}))
+    (trial / "agent/trajectory.json").write_text(json.dumps({"steps": [
+        {"step_id": 1, "extra": {"stop_reason": "error", "error": "temporary endpoint error"}},
+        {"step_id": 2, "extra": {"stop_reason": "stop"}},
+    ]}))
+    (trial / "artifacts/bench/answers/lm202601-3/final-response.txt").write_text("\\boxed{C}")
+    row = module.analyze_trial(trial)
+    assert row["cause"] == "scored_wrong_label"
+    assert row["recovered_model_error_event"] is True
+    assert row["terminal_model_error"] is False
