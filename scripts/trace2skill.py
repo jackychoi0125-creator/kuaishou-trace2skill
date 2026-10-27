@@ -35,9 +35,12 @@ KIT = Path(os.environ.get("HARBOR_KIT_ROOT", WORKSPACE / "spreadsheetbench-harbo
 def benchmark_name() -> str:
     manifest = KIT / "benchmark/splits/split_manifest.json"
     if manifest.is_file():
-        value = str(json.loads(manifest.read_text(encoding="utf-8")).get("benchmark", "")).casefold()
+        split_info = json.loads(manifest.read_text(encoding="utf-8"))
+        value = str(split_info.get("benchmark") or split_info.get("dataset") or "").casefold()
         if value == "alfworld":
             return "alfworld"
+        if value in {"livemathematicianbench", "livemath"}:
+            return "livemath"
     return "spreadsheetbench"
 
 
@@ -67,6 +70,47 @@ def read_models() -> dict[str, str]:
         "kimi-k2.6": str(model_cfg["optimizer_openai_compatible_model"]),
         "deepseek-v4-flash": str(model_cfg["target_openai_compatible_model"]),
     }
+
+
+def response_audit_usage(run_dir: Path) -> dict:
+    """Reconstruct exact reported optimizer usage across process restarts.
+
+    Each successful response is written before its Reflect checkpoint.  Reading
+    these private audit files counts a response even if a crash happened before
+    the corresponding patch was persisted and the call had to be repeated.
+    """
+    totals: dict[str, dict] = {}
+    for path in sorted((run_dir / "optimizer-responses").glob("*.json")):
+        row = json.loads(path.read_text(encoding="utf-8"))
+        stage = str(row.get("stage") or "other")
+        usage = row.get("usage") or {}
+        prompt = int(usage.get("prompt_tokens") or 0)
+        completion = int(usage.get("completion_tokens") or 0)
+        reasoning = int(usage.get("reasoning_tokens") or 0)
+        cached = int(usage.get("cached_tokens") or 0)
+        reported = int(usage.get("total_tokens") or prompt + completion)
+        if (prompt < 0 or completion < 0 or reasoning < 0 or cached < 0
+                or reasoning > completion or cached > prompt or reported != prompt + completion):
+            raise ValueError(f"invalid optimizer usage audit: {path}")
+        for key in (stage, "_total"):
+            bucket = totals.setdefault(key, {
+                "calls": 0, "prompt_tokens": 0, "completion_tokens": 0, "total_tokens": 0,
+                "reasoning_tokens": 0, "cached_tokens": 0, "finish_reasons": {}, "truncated_calls": 0,
+            })
+            bucket["calls"] += 1
+            bucket["prompt_tokens"] += prompt
+            bucket["completion_tokens"] += completion
+            bucket["total_tokens"] += reported
+            bucket["reasoning_tokens"] += reasoning
+            bucket["cached_tokens"] += cached
+            finish = str(usage.get("finish_reason") or "unknown")
+            bucket["finish_reasons"][finish] = bucket["finish_reasons"].get(finish, 0) + 1
+            bucket["truncated_calls"] += int(finish in {"length", "max_tokens"})
+    totals.setdefault("_total", {
+        "calls": 0, "prompt_tokens": 0, "completion_tokens": 0, "total_tokens": 0,
+        "reasoning_tokens": 0, "cached_tokens": 0, "finish_reasons": {}, "truncated_calls": 0,
+    })
+    return totals
 
 
 def model_check(out_path: Path) -> dict:
@@ -304,6 +348,24 @@ def _harbor_error_counts(job_dir: Path, trace_path: Path, summary: dict) -> dict
     }
 
 
+def _livemath_train_labels(expected: set[str]) -> dict[str, str]:
+    """Read only officially prepared Train references for optimizer feedback."""
+    labels: dict[str, str] = {}
+    pattern = "workspace/tasks/livemath-train.*/lm*/tests/reference/reference.json"
+    for path in KIT.glob(pattern):
+        reference = json.loads(path.read_text(encoding="utf-8"))
+        task_id = str(reference.get("id", ""))
+        if task_id not in expected:
+            continue
+        label = str(reference.get("correct", ""))
+        if label not in set("ABCDE") or (task_id in labels and labels[task_id] != label):
+            raise RuntimeError("official Train reference labels are missing or inconsistent")
+        labels[task_id] = label
+    if set(labels) != expected:
+        raise RuntimeError("official prepared Train references do not cover the full split")
+    return labels
+
+
 def convert_trace_file(trace_file: Path, split: str, out_dir: Path) -> list[dict]:
     expected = json.loads((KIT / f"benchmark/splits/{split}/items.json").read_text(encoding="utf-8"))
     task_types = {str(row["id"]): str(row.get("task_type", "")) for row in expected}
@@ -321,6 +383,17 @@ def convert_trace_file(trace_file: Path, split: str, out_dir: Path) -> list[dict
         )
         for row in records
     ]
+    if benchmark_name() == "livemath" and split == "train":
+        # SkillOpt's native LiveMath Reflect compares failed choices with the
+        # correct Train option. Feed that label only through Train rollouts;
+        # Val/Test references are never opened or placed in model context.
+        labels = _livemath_train_labels(expected_ids)
+        for result in results:
+            result["reference_text"] = (
+                f"Official TRAIN feedback: correct option label {labels[result['id']]}. "
+                "Use this only to diagnose a transferable choice-comparison error; "
+                "never copy a label or theorem-specific answer into a Skill."
+            )
     (out_dir / "rollouts.json").write_text(json.dumps(results, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     manifest = {
         "split": split,
@@ -360,6 +433,7 @@ def configure_optimizer() -> dict:
         optimizer_reasoning_effort="high",
         optimizer_timeout_seconds=600,
         optimizer_temperature=0.2,
+        optimizer_stream=True,
         # Target is configured only as descriptive metadata. Actual target tasks
         # are invoked by Harbor Kit and never use SkillOpt's chat_target().
         target_base_url=target_proxy.base_url,
@@ -389,6 +463,7 @@ def evolve(args: argparse.Namespace) -> dict:
     if run_dir.exists() and not args.resume:
         raise FileExistsError(f"run directory already exists; pass --resume to continue: {run_dir}")
     run_dir.mkdir(parents=True, exist_ok=True)
+    os.environ["TRACE2SKILL_OPTIMIZER_RESPONSE_DIR"] = str(run_dir / "optimizer-responses")
     conversion = run_dir / "converted-train"
     trace_file = Path(args.train_trace).resolve() if args.train_trace else _trace_file("train")
     if not (conversion / "rollouts.json").is_file():
@@ -435,7 +510,8 @@ def evolve(args: argparse.Namespace) -> dict:
         )
         (reflect_dir / "raw-patches.json").write_text(json.dumps(patches, ensure_ascii=False, indent=2) + "\n")
 
-    eligible, rejected_edits = filter_patch_pool(patches)
+    train_outcomes = {str(row["id"]): int(row["hard"]) for row in results}
+    eligible, rejected_edits = filter_patch_pool(patches, train_outcomes=train_outcomes)
     failure_edits = [x["edit"] for x in eligible if x["edit"].get("source_type") == "failure"]
     success_edits = [x["edit"] for x in eligible if x["edit"].get("source_type") == "success"]
     risk_report = {
@@ -457,7 +533,7 @@ def evolve(args: argparse.Namespace) -> dict:
     if selected_path.is_file():
         selected = json.loads(selected_path.read_text())
     else:
-        merged_eligible, merged_rejected = filter_patch_pool([merged])
+        merged_eligible, merged_rejected = filter_patch_pool([merged], train_outcomes=train_outcomes)
         if not merged_eligible:
             selected = {"reasoning": "all edits rejected by evidence/risk filter", "edits": []}
             risk_report["post_aggregate_rejected"] = [
@@ -475,7 +551,7 @@ def evolve(args: argparse.Namespace) -> dict:
     candidate_text, reports = apply_patch_with_report(initial, selected)
     seed_placeholder = (
         "No benchmark-derived strategies have been learned yet. "
-        "Use the agent's normal reasoning and the environment feedback."
+        "Use the agent's normal reasoning and the task's requested final-answer format."
     )
     removed_seed_placeholder = bool(
         get_payload_items(selected, "patch") and seed_placeholder in candidate_text
@@ -491,7 +567,11 @@ def evolve(args: argparse.Namespace) -> dict:
     skill_file = package_skill(candidate_text, run_dir / "candidate/skills")
     if skill_file.read_text(encoding="utf-8") != candidate_text.rstrip() + "\n":
         raise AssertionError("packaged Pi skill does not match SkillOpt candidate")
-    optimizer_usage = get_token_summary()
+    optimizer_usage = response_audit_usage(run_dir)
+    usage_source = "response_audits"
+    if not optimizer_usage["_total"]["calls"]:
+        optimizer_usage = get_token_summary()
+        usage_source = "process_ledger"
     optimizer_totals = optimizer_usage.get("_total", {})
     audit = {
         "stage": "candidate_created" if get_payload_items(selected, "patch") else "no_candidate",
@@ -504,6 +584,7 @@ def evolve(args: argparse.Namespace) -> dict:
         "optimizer_model_id": models["kimi-k2.6"],
         "optimizer_thinking": "on",
         "optimizer_max_completion_tokens": 90000,
+        "optimizer_streaming": True,
         "trace_file": str(trace_file),
         "failure_only": False,
         "reflection_mode": "success_failure_contrastive",
@@ -526,6 +607,7 @@ def evolve(args: argparse.Namespace) -> dict:
         "skill_sha256": hashlib.sha256(candidate_text.encode()).hexdigest(),
         "skill_chars": len(candidate_text),
         "optimizer_token_usage": optimizer_usage,
+        "optimizer_usage_source": usage_source,
         "total_skill_generation_tokens": int(optimizer_totals.get("total_tokens", 0)),
     }
     (run_dir / "run_config.json").write_text(json.dumps(audit, ensure_ascii=False, indent=2) + "\n")
@@ -538,6 +620,8 @@ def _initial_skill_path() -> Path:
         return Path(configured).expanduser().resolve()
     if benchmark_name() == "alfworld":
         return ROOT / "src/skillopt/envs/alfworld/skills/blank.md"
+    if benchmark_name() == "livemath":
+        return ROOT / "src/skillopt/envs/livemath/skills/blank.md"
     return ROOT / "src/skillopt/envs/harbor_pi/skills/initial.md"
 
 
@@ -624,12 +708,17 @@ def evaluate_candidate(args: argparse.Namespace) -> dict:
     accepted = comparison_clean and candidate_acc > baseline_acc
     generation_tokens = int(audit.get("total_skill_generation_tokens", 0))
 
+    # The adapter keeps its audit files in the outer job directory and asks
+    # Harbor to create the official run below ``official-jobs``.  Discover the
+    # completed official summary, rather than assuming a fixed directory depth.
     run_dirs = sorted(
-        p
-        for p in (run_dir / "harbor-jobs" / audit["candidate_id"] / "val").glob("*/20*")
-        if p.is_dir()
+        p.parent
+        for p in (run_dir / "harbor-jobs" / audit["candidate_id"] / "val").rglob("summary.json")
+        if p.parent.is_dir()
     )
-    eval_job = run_dirs[-1] if run_dirs else None
+    if len(run_dirs) != 1:
+        raise RuntimeError(f"expected exactly one completed official Val job; found {len(run_dirs)}")
+    eval_job = run_dirs[0]
     summary = (
         json.loads((eval_job / "summary.json").read_text()) if eval_job and (eval_job / "summary.json").exists() else {}
     )
@@ -684,6 +773,7 @@ def evaluate_candidate(args: argparse.Namespace) -> dict:
                     "candidate_id": audit["candidate_id"],
                     "val_accuracy": candidate_acc,
                     "skill_sha256": audit["skill_sha256"],
+                    "skill_enabled": True,
                     "val_by_id": candidate,
                     "val_quality": candidate_quality,
                 },
@@ -776,11 +866,16 @@ def _search_initialize_best(
     state_path = best_root / "best.json"
     if state_path.is_file():
         old = json.loads(state_path.read_text(encoding="utf-8"))
-        if (
-            old.get("skill_sha256") == skill_hash
-            and old.get("skill_enabled", True) == (not no_skill)
-            and old.get("val_by_id")
-        ):
+        # --initial-no-skill describes only R0. An accepted Best is immutable
+        # across resume: missing scores, a changed Skill or a disabled flag is
+        # an error, never permission to silently replace it with R0.
+        if old.get("candidate_id") != "R0":
+            if (old.get("skill_sha256") != skill_hash or not old.get("val_by_id")
+                    or not old.get("skill_enabled", True)):
+                raise RuntimeError("accepted Best state or Skill changed before resume")
+            return best_skill
+        if (old.get("skill_sha256") == skill_hash and old.get("val_by_id")
+                and old.get("skill_enabled", True) == (not no_skill)):
             return best_skill
     val_items = json.loads((KIT / "benchmark/splits/val/items.json").read_text(encoding="utf-8"))
     candidate_id = f"best-init-val-{skill_hash[:12]}"
@@ -839,6 +934,11 @@ def _prior_clean_train_rollout(
         try:
             manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
             request = json.loads((manifest_path.parent / "run_request.json").read_text(encoding="utf-8"))
+            recorded_retries = request.get("max_retries")
+            retries_match = (
+                (recorded_retries is None and max_retries == 0)
+                or (recorded_retries is not None and int(recorded_retries) == max_retries)
+            )
             trace_path = Path(manifest["trace_file"])
             job_dir = Path(manifest["job_dir"])
             if not (
@@ -846,7 +946,7 @@ def _prior_clean_train_rollout(
                 and manifest.get("split") == "train"
                 and manifest.get("candidate_sha256") == skill_sha256
                 and int(request.get("concurrent", -1)) == concurrent
-                and int(request.get("max_retries", -1)) == max_retries
+                and retries_match
                 and job_dir.joinpath("summary.json").is_file()
             ):
                 continue
@@ -868,7 +968,7 @@ def _prior_clean_train_rollout(
 
 def search_candidates(args: argparse.Namespace) -> list[dict]:
     """Run the bounded Train→Reflect→Train-screen→Val candidate loop."""
-    from trace2skill.campaign import run_candidate_sequence
+    from trace2skill.campaign import regressed_success_counterexamples, run_candidate_sequence
 
     assert_real_run_ready()
     run_root = Path(args.run_root).resolve()
@@ -916,23 +1016,39 @@ def search_candidates(args: argparse.Namespace) -> list[dict]:
         int((p / "run_config.json").exists() and json.loads((p / "run_config.json").read_text()).get("total_skill_generation_tokens", 0))
         for p in existing
     )
+    # An invalid or interrupted candidate can still consume real optimizer
+    # tokens. Preserve and charge its audited usage even after moving it out
+    # of the active C### sequence, so resume cannot silently reset the budget.
+    prior_tokens += sum(
+        int(json.loads(path.read_text(encoding="utf-8")).get("optimizer_usage", {}).get("total_tokens", 0))
+        for path in (run_root / "aborted").glob("*/abort_audit.json")
+    )
     search_spent = prior_tokens
 
     def run_one(candidate_id: str) -> dict:
         nonlocal search_spent
-        os.environ["TRACE2SKILL_GENERATION_TOKEN_BUDGET"] = str(max(0, int(args.token_budget) - search_spent))
+        round_dir = run_root / candidate_id
+        prior_config_path = round_dir / "run_config.json"
+        prior_config_tokens = (
+            int(json.loads(prior_config_path.read_text(encoding="utf-8")).get("total_skill_generation_tokens", 0))
+            if prior_config_path.is_file() else 0
+        )
+        audited_tokens = int(response_audit_usage(round_dir)["_total"]["total_tokens"])
+        unaccounted_resumed_tokens = max(0, audited_tokens - prior_config_tokens)
+        os.environ["TRACE2SKILL_GENERATION_TOKEN_BUDGET"] = str(max(
+            0, int(args.token_budget) - search_spent - unaccounted_resumed_tokens
+        ))
         best_skill = run_root / "best/best_skill.md"
         best_state = json.loads((run_root / "best/best.json").read_text(encoding="utf-8"))
         best_skill_dir = run_root / "best/skills"
         if best_state.get("skill_enabled", True) and not best_skill_dir.is_dir():
             package_skill(best_skill.read_text(encoding="utf-8"), run_root / "best/skills")
-        round_dir = run_root / candidate_id
         runner = HarborKitRollout(KIT, run_root / "harbor-jobs")
         train_items = json.loads((KIT / "benchmark/splits/train/items.json").read_text(encoding="utf-8"))
         best_train_dir = round_dir / "train-current-best"
         baseline_rows = (
             load_records(Path(args.initial_train_trace).resolve())
-            if candidate_id == "C001" and args.initial_train_trace and not best_state.get("skill_enabled", True)
+            if args.initial_train_trace and not best_state.get("skill_enabled", True)
             else []
         )
         baseline_reusable = bool(baseline_rows) and all(
@@ -987,28 +1103,36 @@ def search_candidates(args: argparse.Namespace) -> list[dict]:
             minibatch_size=args.minibatch_size, edit_budget=args.edit_budget, failure_only=False,
             resume=round_dir.exists(),
         )
+        previous_config = round_dir / "run_config.json"
+        prior_candidate_tokens = (
+            int(json.loads(previous_config.read_text(encoding="utf-8")).get("total_skill_generation_tokens", 0))
+            if previous_config.is_file() else 0
+        )
         reflect_recovered_without_usage = (
-            (round_dir / "reflect/raw-patches.json").is_file()
+            ((round_dir / "reflect/raw-patches.json").is_file()
+             or (round_dir / "reflect/reflect-batches.json").is_file())
             and not (round_dir / "run_config.json").is_file()
         )
         audit = evolve(evolve_args)
-        if reflect_recovered_without_usage:
+        if reflect_recovered_without_usage and audit.get("optimizer_usage_source") != "response_audits":
             # A prior process may have completed live Reflect calls and saved
             # their patches before a later deterministic stage failed. The
             # response usage existed only in that process's in-memory ledger,
             # so mark the resumed candidate's usage as a lower bound instead
             # of silently treating the resumed ledger as complete.
             audit["optimizer_usage_complete"] = False
-            audit["optimizer_usage_gap"] = "Reflect completed in an earlier process; per-response usage was not checkpointed"
+            audit["optimizer_usage_gap"] = "Reflect calls were checkpointed in an earlier process; per-response token usage was not checkpointed"
             (round_dir / "run_config.json").write_text(
                 json.dumps(audit, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
             )
         candidate_tokens = int(audit.get("total_skill_generation_tokens", 0))
+        new_candidate_tokens = max(0, candidate_tokens - prior_candidate_tokens)
         if audit.get("stage") == "no_candidate":
             return {
                 "candidate_id": candidate_id,
                 "decision": "NO_CANDIDATE",
                 "generation_tokens": candidate_tokens,
+                "new_generation_tokens": new_candidate_tokens,
                 "reason": "risk filter or native selector produced no eligible edit; no rollout performed",
             }
         if best_train is None:
@@ -1018,7 +1142,7 @@ def search_candidates(args: argparse.Namespace) -> list[dict]:
                 out_dir=best_train_dir,
                 candidate_id=f"{candidate_id}-best-train",
             )
-        search_spent += candidate_tokens
+        search_spent += new_candidate_tokens
         candidate_train_dir = round_dir / "candidate-train"
         candidate_train = runner.run_split(
             "train", train_items, skill_dir=round_dir / "candidate/skills", out_dir=candidate_train_dir,
@@ -1028,6 +1152,8 @@ def search_candidates(args: argparse.Namespace) -> list[dict]:
         after = {str(r["id"]): int(r["hard"]) for r in candidate_train}
         fixed = sorted(k for k in before if not before[k] and after[k])
         regressed = sorted(k for k in before if before[k] and not after[k])
+        selected_patch = json.loads((round_dir / "select/selected-patch.json").read_text())
+        protected_regressions = regressed_success_counterexamples(selected_patch, before, after)
         train_delta = sum(after.values()) / len(after) - sum(before.values()) / len(before)
         screen = {
             "candidate_id": candidate_id,
@@ -1036,6 +1162,7 @@ def search_candidates(args: argparse.Namespace) -> list[dict]:
             "delta": train_delta,
             "fixed_cases": fixed,
             "regressed_cases": regressed,
+            "regressed_success_counterexamples": protected_regressions,
             "candidate_generation_tokens": audit.get("total_skill_generation_tokens", 0),
             "best_execution_or_zero_response_trials": sum(
                 bool(r.get("execution_error") or r.get("model_unavailable") or r.get("terminal_model_error")) for r in best_train
@@ -1048,20 +1175,25 @@ def search_candidates(args: argparse.Namespace) -> list[dict]:
         if screen["best_execution_or_zero_response_trials"] or screen["candidate_execution_or_zero_response_trials"]:
             audit.update(stage="train_screen_inconclusive", decision="INCONCLUSIVE_TRAIN_ERRORS")
             (round_dir / "run_config.json").write_text(json.dumps(audit, ensure_ascii=False, indent=2) + "\n")
-            return {"candidate_id": candidate_id, "decision": "INCONCLUSIVE_TRAIN_ERRORS", "generation_tokens": candidate_tokens}
-        if train_delta < -float(args.train_regression_tolerance):
+            return {"candidate_id": candidate_id, "decision": "INCONCLUSIVE_TRAIN_ERRORS", "generation_tokens": candidate_tokens, "new_generation_tokens": new_candidate_tokens}
+        if train_delta < -float(args.train_regression_tolerance) or protected_regressions:
             rejected = {
                 "candidate_id": candidate_id,
-                "reason": "Train regression screen failed",
+                "reason": (
+                    "Cited successful Train counterexample regressed"
+                    if protected_regressions else "Train regression screen failed"
+                ),
                 "train_screen": screen,
-                "patch": json.loads((round_dir / "select/selected-patch.json").read_text()),
+                "patch": selected_patch,
             }
             (round_dir / "rejected_edit_buffer.json").write_text(json.dumps(rejected, indent=2) + "\n")
             audit.update(stage="train_screen_rejected", decision="REJECT_TRAIN_SCREEN")
             (round_dir / "run_config.json").write_text(json.dumps(audit, ensure_ascii=False, indent=2) + "\n")
-            return {"candidate_id": candidate_id, "decision": "REJECT_TRAIN_SCREEN", "generation_tokens": candidate_tokens}
-        decision = evaluate_candidate(argparse.Namespace(run_dir=str(round_dir), val_trace=None))
-        return {"candidate_id": candidate_id, "decision": decision["decision"], "generation_tokens": candidate_tokens, "val_accuracy": decision["candidate_val_accuracy"]}
+            return {"candidate_id": candidate_id, "decision": "REJECT_TRAIN_SCREEN", "generation_tokens": candidate_tokens, "new_generation_tokens": new_candidate_tokens}
+        decision = evaluate_candidate(argparse.Namespace(
+            run_dir=str(round_dir), val_trace=args.initial_val_trace,
+        ))
+        return {"candidate_id": candidate_id, "decision": decision["decision"], "generation_tokens": candidate_tokens, "new_generation_tokens": new_candidate_tokens, "val_accuracy": decision["candidate_val_accuracy"]}
 
     outcomes = run_candidate_sequence(candidate_ids, run_one, max(0, int(args.token_budget) - prior_tokens))
     all_outcomes = prior_outcomes + outcomes

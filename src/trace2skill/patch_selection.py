@@ -9,9 +9,14 @@ _DISMISSES_INVALID_ACTION_COST = re.compile(
     r"(?:invalid|redundant|unnecessary)\s+(?:actions?|commands?|tool calls?).{0,100}"
     r"(?:no harm|harmless|no cost|free)", re.I | re.S,
 )
+_FIXED_OPTION_LABEL = re.compile(
+    r"\b(?i:choose|select|answer(?:\s+is)?|boxed)\s*[:=]?\s*[A-E]\b|\\boxed\s*\{\s*[A-E]\s*\}"
+)
 
 
-def filter_patch_pool(patches: list[dict]) -> tuple[list[dict], list[dict]]:
+def filter_patch_pool(
+    patches: list[dict], *, train_outcomes: dict[str, int] | None = None
+) -> tuple[list[dict], list[dict]]:
     accepted: list[dict] = []
     rejected: list[dict] = []
     seen: set[tuple[str, str, str]] = set()
@@ -27,6 +32,13 @@ def filter_patch_pool(patches: list[dict]) -> tuple[list[dict], list[dict]]:
             reasons = []
             if not edit.get("source_case_ids"):
                 reasons.append("missing_train_provenance")
+            if train_outcomes is not None:
+                sources = [str(case) for case in (edit.get("source_case_ids") or [])]
+                counterexamples = [str(case) for case in (edit.get("success_counterexamples") or [])]
+                if any(case not in train_outcomes for case in sources):
+                    reasons.append("unknown_train_source")
+                if any(train_outcomes.get(case) != 1 for case in counterexamples):
+                    reasons.append("counterexample_not_successful_in_current_train")
             applicability = str(edit.get("applicability", "")).strip()
             non_applicability = str(edit.get("non_applicability", "")).strip()
             if not applicability or applicability.startswith("REQUIRED:"):
@@ -36,8 +48,10 @@ def filter_patch_pool(patches: list[dict]) -> tuple[list[dict], list[dict]]:
             if source == "failure" and not edit.get("success_counterexamples"):
                 reasons.append("missing_success_counterexample")
             content = str(edit.get("content", "")).strip()
-            if re.search(r"\b(?:train|val|test)(?::|__)[0-9]{4}\b", content, re.I):
+            if re.search(r"\b(?:train|val|test)(?::|__)[0-9]{4}\b|\b(?:lm)?20\d{4}[:-]\d+\b", content, re.I):
                 reasons.append("benchmark_case_id_in_skill_content")
+            if _FIXED_OPTION_LABEL.search(content):
+                reasons.append("hardcoded_option_label_in_skill_content")
             if _ABSOLUTE.search(content) and len(non_applicability) < 24:
                 reasons.append("unbounded_absolute_rule")
             if _DISMISSES_INVALID_ACTION_COST.search(str(edit.get("regression_risk", ""))):

@@ -5,6 +5,7 @@ from __future__ import annotations
 import hashlib
 import json
 import os
+import re
 import subprocess
 import time
 from pathlib import Path
@@ -35,14 +36,18 @@ class HarborKitRollout:
         self.run_script = self.kit_root / "run.sh"
         if not self.run_script.is_file():
             raise FileNotFoundError(self.run_script)
-        self.supports_max_retries = "--max-retries" in self.run_script.read_text(encoding="utf-8", errors="replace")
+        run_source = self.run_script.read_text(encoding="utf-8", errors="replace")
+        self.supports_max_retries = bool(re.search(r"(?m)^\s*--max-retries\)", run_source))
         split_manifest = self.kit_root / "benchmark/splits/split_manifest.json"
         self.benchmark = "spreadsheetbench"
         if split_manifest.is_file():
             try:
-                source = str(json.loads(split_manifest.read_text(encoding="utf-8")).get("benchmark", ""))
-                if source.casefold() == "alfworld":
+                split_info = json.loads(split_manifest.read_text(encoding="utf-8"))
+                source = str(split_info.get("benchmark") or split_info.get("dataset") or "").casefold()
+                if source == "alfworld":
                     self.benchmark = "alfworld"
+                elif source in {"livemathematicianbench", "livemath"}:
+                    self.benchmark = "livemath"
             except (OSError, ValueError):
                 pass
 
@@ -108,7 +113,9 @@ class HarborKitRollout:
                 continue
             if request.get("candidate_sha256") != skill_hash or request.get("expected_case_count") != len(expected):
                 continue
-            for prior_job in sorted(p for p in prior_root.iterdir() if p.is_dir()):
+            official_prior = prior_root / "official-jobs"
+            prior_runs = official_prior if official_prior.is_dir() else prior_root
+            for prior_job in sorted(p for p in prior_runs.iterdir() if p.is_dir() and not p.name.startswith(".")):
                 try:
                     prior_trials = [json.loads(p.read_text(encoding="utf-8")) for p in prior_job.glob("*/result.json")]
                 except (OSError, ValueError):
@@ -168,6 +175,9 @@ class HarborKitRollout:
         (job_root / "run_request.json").write_text(
             json.dumps(request_manifest, indent=2) + "\n", encoding="utf-8"
         )
+        # LiveMath rejects a populated --jobs-dir. Keep Adapter manifests and
+        # logs in job_root, and give the official Kit its own untouched root.
+        official_jobs = job_root / "official-jobs"
         command = [
             str(self.run_script),
             "--bench",
@@ -181,8 +191,13 @@ class HarborKitRollout:
             "--base-url",
             proxy_credentials("target").base_url,
             "--jobs-dir",
-            str(job_root),
+            str(official_jobs),
         ]
+        if self.benchmark == "livemath":
+            # The official direct-chat profile grades the final assistant text.
+            # The historical answer.txt file profile is a different experiment.
+            command.extend(["--submission-mode", "final-response", "--seed", "0",
+                            "--agent-timeout", "1800"])
         if self.supports_max_retries:
             command.extend(["--max-retries", str(self.max_retries)])
         if skill_dir:
@@ -206,7 +221,7 @@ class HarborKitRollout:
                 timeout=24 * 60 * 60,
                 check=False,
             )
-        run_dirs = sorted(p for p in job_root.iterdir() if p.is_dir())
+        run_dirs = sorted(p for p in official_jobs.iterdir() if p.is_dir() and not p.name.startswith(".")) if official_jobs.is_dir() else []
         if not run_dirs:
             raise RuntimeError(f"Harbor run failed (exit={proc.returncode}); see {job_root / 'runner.log'}")
         result_dir = run_dirs[-1]

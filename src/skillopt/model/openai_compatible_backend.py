@@ -26,6 +26,7 @@ from __future__ import annotations
 
 import json
 import os
+from pathlib import Path
 import threading
 import time
 from dataclasses import dataclass
@@ -58,6 +59,7 @@ class OpenAICompatibleConfig:
     completion_token_field: str
     thinking: str
     reasoning_effort: str
+    stream: bool
 
 
 def _parse_optional_float(value: Any) -> float | None:
@@ -99,6 +101,7 @@ def _initial_config(role: str) -> OpenAICompatibleConfig:
         completion_token_field=_role_env(role, "COMPLETION_TOKEN_FIELD", "max_tokens"),
         thinking=_role_env(role, "THINKING", ""),
         reasoning_effort=_role_env(role, "REASONING_EFFORT", ""),
+        stream=_role_env(role, "STREAM", "0").strip().lower() in {"1", "true", "yes"},
     )
 
 
@@ -116,6 +119,10 @@ _optimizer_token_budget: int | None = None
 
 class OptimizerTokenBudgetExceeded(RuntimeError):
     """Raised before sending a request that could exceed the configured budget."""
+
+
+class OptimizerResponseAuditError(RuntimeError):
+    """Do not repeat a completed model call when local audit persistence fails."""
 
 
 def set_optimizer_token_budget(limit: int | None) -> None:
@@ -238,8 +245,65 @@ def _chat_messages_impl(
         kwargs["timeout"] = timeout
 
     last_err: Exception | None = None
+
+    def record_response(content: str, usage: dict[str, Any]) -> None:
+        if role != "optimizer":
+            return
+        root_name = os.environ.get("TRACE2SKILL_OPTIMIZER_RESPONSE_DIR")
+        if not root_name:
+            return
+        try:
+            root = Path(root_name)
+            root.mkdir(parents=True, exist_ok=True, mode=0o700)
+            safe_content = content.replace(config.api_key, "[REDACTED]") if config.api_key else content
+            payload = json.dumps({"stage": stage, "content": safe_content, "usage": usage}, ensure_ascii=False, indent=2) + "\n"
+            path = root / f"{time.time_ns()}-{stage}.json"
+            descriptor = os.open(path, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
+            with os.fdopen(descriptor, "w", encoding="utf-8") as output:
+                output.write(payload)
+        except OSError as error:
+            raise OptimizerResponseAuditError("failed to persist optimizer response audit") from error
+
     for attempt in range(retries):
         try:
+            if role == "optimizer" and config.stream and not tools and not return_message:
+                stream = client.chat.completions.create(
+                    **kwargs, stream=True, stream_options={"include_usage": True},
+                )
+                content_parts: list[str] = []
+                stream_usage: dict[str, int] | None = None
+                finish_reason = "unknown"
+                reasoning_present = False
+                try:
+                    for chunk in stream:
+                        if getattr(chunk, "usage", None) is not None:
+                            stream_usage = usage_from_openai_usage(chunk.usage)
+                        for choice in getattr(chunk, "choices", None) or []:
+                            delta = getattr(choice, "delta", None)
+                            if delta is not None:
+                                value = getattr(delta, "content", None)
+                                if isinstance(value, str):
+                                    content_parts.append(value)
+                                reasoning_present |= bool(getattr(delta, "reasoning_content", None))
+                            if getattr(choice, "finish_reason", None):
+                                finish_reason = choice.finish_reason
+                finally:
+                    stream.close()
+                if stream_usage is None:
+                    raise RuntimeError("optimizer stream ended without server token usage")
+                if finish_reason == "unknown":
+                    raise RuntimeError("optimizer stream ended without finish reason")
+                tracker.record(
+                    stage, stream_usage["prompt_tokens"], stream_usage["completion_tokens"],
+                    reasoning_tokens=stream_usage.get("reasoning_tokens", 0),
+                    cached_tokens=stream_usage.get("cached_tokens", 0),
+                    finish_reason=finish_reason,
+                )
+                stream_usage["finish_reason"] = finish_reason
+                stream_usage["reasoning_content_present"] = reasoning_present
+                content = "".join(content_parts)
+                record_response(content, stream_usage)
+                return content, stream_usage
             resp = client.chat.completions.create(**kwargs)
             choices = getattr(resp, "choices", None) or []
             if not choices:
@@ -262,7 +326,10 @@ def _chat_messages_impl(
             usage_info["reasoning_content_present"] = bool(getattr(message, "reasoning_content", None))
             if return_message:
                 return compat_message_from_chat_message(message), usage_info
+            record_response(text, usage_info)
             return text, usage_info
+        except OptimizerResponseAuditError:
+            raise
         except Exception as e:  # noqa: BLE001
             last_err = e
             time.sleep(min(2 ** attempt, 30))
@@ -390,6 +457,7 @@ def _update_config(
     completion_token_field: str | None = None,
     thinking: str | None = None,
     reasoning_effort: str | None = None,
+    stream: bool | None = None,
 ) -> None:
     env_prefix = role.upper()
     if base_url is not None:
@@ -417,6 +485,9 @@ def _update_config(
         config.thinking = str(thinking).strip().lower()
     if reasoning_effort is not None:
         config.reasoning_effort = str(reasoning_effort).strip().lower()
+    if stream is not None:
+        config.stream = bool(stream)
+        os.environ[f"{env_prefix}_OPENAI_COMPATIBLE_STREAM"] = "1" if stream else "0"
 
 
 def configure_openai_compatible(
@@ -448,6 +519,8 @@ def configure_openai_compatible(
     target_completion_token_field: str | None = None,
     target_thinking: str | None = None,
     target_reasoning_effort: str | None = None,
+    optimizer_stream: bool | None = None,
+    target_stream: bool | None = None,
 ) -> None:
     """Configure the generic OpenAI-compatible backend at runtime.
 
@@ -479,6 +552,7 @@ def configure_openai_compatible(
             completion_token_field=optimizer_completion_token_field if optimizer_completion_token_field is not None else completion_token_field,
             thinking=optimizer_thinking if optimizer_thinking is not None else thinking,
             reasoning_effort=optimizer_reasoning_effort if optimizer_reasoning_effort is not None else reasoning_effort,
+            stream=optimizer_stream,
         )
         _update_config(
             TARGET_CONFIG,
@@ -492,6 +566,7 @@ def configure_openai_compatible(
             completion_token_field=target_completion_token_field if target_completion_token_field is not None else completion_token_field,
             thinking=target_thinking if target_thinking is not None else thinking,
             reasoning_effort=target_reasoning_effort if target_reasoning_effort is not None else reasoning_effort,
+            stream=target_stream,
         )
     _reset_clients()
 

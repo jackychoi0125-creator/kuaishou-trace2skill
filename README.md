@@ -156,4 +156,50 @@ If a previous attempt was documented as incomplete due to HTTP 429, use a new `-
 
 After a complete confirmation, `python scripts/alfworld_hypothesis_confirm_analysis.py --candidate-id H005` writes a case-paired, offline report of official rewards, Skill reads, helper calls, action counts and target output tokens. It makes no model calls and refuses partial trial sets.
 
-Once the Skill and comparison protocol are frozen, `python scripts/alfworld_final_test.py --concurrent 4` performs one complete official 134-case Test comparison of H005 and no Skill under the same model and transport conditions. It copies the frozen ALFWorld Skill and helper into an isolated parent directory so Round 1's spreadsheet Skill is not registered during Round 2. It writes a run manifest before execution, refuses a second run root, and never feeds Test results into Skill generation or Best selection. The October 25 attempt was stopped when a packaging audit found that its candidate path also exposed the Round 1 Skill; its partial data is excluded. The isolated rerun is underway. The Val figures above must not be represented as Test scores.
+Once the Skill and comparison protocol are frozen, `python scripts/alfworld_final_test.py --concurrent 4` performs one complete official 134-case Test comparison of H005 and no Skill under the same model and transport conditions. It copies the frozen ALFWorld Skill and helper into an isolated parent directory so Round 1's spreadsheet Skill is not registered during Round 2. It writes a run manifest before execution, refuses a second run root, and never feeds Test results into Skill generation or Best selection. The October 25 attempt was stopped when a packaging audit found that its candidate path also exposed the Round 1 Skill; its partial data is excluded. The corrected independent Test finished at **120/134 for H005 versus 109/134 without Skill**, with no terminal error cases in either arm. These held-out results do not enter subsequent Skill generation.
+
+## LiveMath v1.1 (October 25 Kit)
+
+The third Kit fixes **35 Train / 17 Val / 125 Test** research-level mathematical MCQs. Its official score is the exact option label parsed from the final assistant response. Use the Kit's default `final-response` profile, option seed 42, sampling seed 0, DeepSeek V4 Flash Thinking OFF, and the pinned Pi/Harbor scorer. Do not compare historical `answer.txt` file-profile runs with direct-chat runs. The target Kit and credentials are external, as in prior rounds.
+
+From a clean submission checkout with the official LiveMath Kit installed separately:
+
+```bash
+source .venv/bin/activate
+export HARBOR_KIT_ROOT=/path/to/pi-harbor-kit-livemath-v1.1
+export TRACE2SKILL_LOCAL_BASE_URL=https://your-authorized-endpoint-base
+export TRACE2SKILL_LOCAL_API_KEY=your-authorized-runtime-token
+python scripts/run_livemath_evolution.py --max-candidates 2 --token-budget 500000
+```
+
+The wrapper checks or creates complete official no-Skill Train and Val baselines, exports their ATIF-v1.8 traces, then invokes the existing bounded SkillOpt Train-screen/Val-gate campaign. It reuses only the matching complete official jobs in its own Kit workspace. A partial or independently mismatched run fails closed. The candidate starts from `src/skillopt/envs/livemath/skills/blank.md`, never inherits an ALFWorld or Spreadsheet Skill, and uses Kimi K2.6 Thinking ON for Reflect/Aggregate/Select/Update. For Train Reflect alone, the optimizer may use the correct option label from the Kit's prepared **Train** reference to compare failed choices; the fixed Pi never receives it, and Val/Test references are not opened by the optimizer. `configs/round3_livemath.yaml` records the intended benchmark settings; the wrapper supplies the executable CLI values. Test is held out until the best candidate and comparison protocol are frozen.
+
+`scripts/livemath_trace_analysis.py --job <official-job-root> --out <csv>` summarizes scored failures, answer parsing, tool use, finish reasons and tokens without reading reference answers. The current local experiment is under `results/livemath-v1.1-20261027/`; its status and measured scores must be read there rather than inferred from the benchmark's published model leaderboard.
+
+To continue the same bounded campaign from its checkpoint, increase the finite candidate and generation-token budgets explicitly. Completed jobs and optimizer stages are reused only when their recorded candidate and Skill hashes match:
+
+```bash
+python scripts/run_livemath_evolution.py --resume --max-candidates 3 --token-budget 1000000 --minibatch-size 4
+```
+
+After the last candidate is decided, freeze Best and run one fresh paired Val confirmation. This runs complete official Val jobs sequentially and does not send the resulting Val traces to Reflect:
+
+```bash
+python scripts/confirm_livemath_val.py \
+  --campaign results/livemath-v1.1-20261027/campaign \
+  --out results/livemath-v1.1-20261027/confirmation-1
+```
+
+Only after the final Skill is frozen, run the held-out Test once. The command verifies the Best Skill SHA256 against the saved Val-gate state and records a freeze manifest before Harbor starts. It never updates the optimizer or reselects Best from Test:
+
+```bash
+python scripts/export_livemath_best.py \
+  --campaign results/livemath-v1.1-20261027/campaign \
+  --confirmation results/livemath-v1.1-20261027/confirmation-1/paired_result.json
+python scripts/run_livemath_final_test.py \
+  --campaign results/livemath-v1.1-20261027/campaign \
+  --confirmation results/livemath-v1.1-20261027/confirmation-1/paired_result.json \
+  --out results/livemath-v1.1-20261027/final-test
+```
+
+The actual local run's exact scores, error counts, token use and Test status are reported in `results/livemath-v1.1-20261027/final_experiment_report.md`. The frozen C002 Skill exceeded no Skill by 3/17 in each of two independent paired Val runs; the held-out Test result remains the final generalization check.

@@ -9,10 +9,15 @@ from typing import Any
 
 
 def normalize_case_id(case_id: Any) -> str:
-    """Map Harbor's filesystem-safe ALFWorld task name to its split ID."""
+    """Map Harbor's filesystem-safe task name to the official split ID."""
     value = str(case_id or "")
     match = re.fullmatch(r"(train|val|test)__(\d{4})", value)
-    return f"{match.group(1)}:{match.group(2)}" if match else value
+    if match:
+        return f"{match.group(1)}:{match.group(2)}"
+    livemath = re.fullmatch(r"lm(20\d{4})-(\d+)", value)
+    if livemath:
+        return f"{livemath.group(1)}:{livemath.group(2)}"
+    return value
 
 
 def terminal_model_error(trace: dict) -> str:
@@ -47,6 +52,20 @@ def _family_from_text(text: str, task_type: str = "") -> str:
         if re.search(pattern, value):
             return label
     return "general"
+
+
+def _livemath_family(text: str) -> str:
+    """Coarse public-question domains; labels never use scores or answer keys."""
+    patterns = (
+        ("algebra_geometry", r"\b(scheme|sheaf|variety|cohomology|ideal|module|algebraic)\b"),
+        ("analysis_pde", r"\b(PDE|Sobolev|elliptic|Schr[oö]dinger|Navier|Laplace|fluid)\b|\\Delta"),
+        ("probability", r"\b(probability|random|stochastic|martingale|Gaussian)\b"),
+        ("discrete_math", r"\b(graph|combinator|integer|finite group|lattice|partition|matrix)\b"),
+    )
+    for name, pattern in patterns:
+        if re.search(pattern, text, re.I):
+            return name
+    return "general_math"
 
 
 def _untrusted(label: str, value: Any) -> str:
@@ -108,7 +127,7 @@ def convert_record(record: dict, out_dir: str | Path, *, task_type: str = "", be
         for step in (trace.get("steps") or [])
         if step.get("source") == "user"
     )
-    family = _family_from_text(user_text, task_type)
+    family = _livemath_family(user_text) if benchmark == "livemath" else _family_from_text(user_text, task_type)
     model_unavailable = (
         int(record.get("input_tokens") or 0) == 0
         and int(record.get("output_tokens") or 0) == 0

@@ -1,0 +1,27 @@
+{
+  "created_at_utc": "2026-10-27T12:44:26.181156+00:00",
+  "benchmark": "LiveMathematicianBench",
+  "kit_version": "v1.1-20261025",
+  "kit_archive_sha256": "6572d42eb0f3cbb68799069e8e483f6caece5c97ab2bcc4efadad60f4b922141",
+  "splits": {
+    "train": 35,
+    "val": 17,
+    "test": 125
+  },
+  "target_model_id": "ep-0lh2e2-1791798733636675306",
+  "target_thinking": "off",
+  "optimizer_model_id": "ep-j0kopj-1791798755291829540",
+  "optimizer_thinking": "on",
+  "optimizer_max_completion_tokens": 90000,
+  "submission_mode": "final-response",
+  "option_seed": 42,
+  "sample_seed": 0,
+  "max_target_output_tokens": 65536,
+  "context_window": 131072,
+  "per_task_timeout_seconds": 1800,
+  "baseline_concurrent": 4,
+  "smoke_job": "workspace/runs/livemath-train/smoke-r0-20261027",
+  "train_baseline_job": "workspace/runs/livemath-train/baseline-r0-20261027",
+  "test_policy": "held-out; run only after best frozen; no Test inputs to optimizer",
+  "api_key_persisted": false
+}

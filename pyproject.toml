@@ -27,4 +27,4 @@ where = ["src"]
 include = ["skillopt", "skillopt.*", "trace2skill", "trace2skill.*", "scripts*"]
 
 [tool.setuptools.package-data]
-"*" = ["*.md", "*.yaml"]
+"*" = ["*.md", "*.yaml", "prompts/*.md", "skills/*.md"]

@@ -68,4 +68,5 @@ class HarborPiAdapter(EnvAdapter):
         )
 
     def get_task_types(self) -> list[str]:
-        return ["alfworld"] if self.runner.benchmark == "alfworld" else ["spreadsheet"]
+        return [{"alfworld": "alfworld", "livemath": "math", "spreadsheetbench": "spreadsheet"}
+                [self.runner.benchmark]]

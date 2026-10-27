@@ -1,0 +1,35 @@
+benchmark: livemath
+kit:
+  root: ../../benchmarks/livemath-v1.1-kit
+  harbor_version: 0.23.0
+  pi_version: 0.85.1
+  train_split: benchmark/splits/train/items.json
+  val_split: benchmark/splits/val/items.json
+  test_split: benchmark/splits/test/items.json
+  submission_mode: final-response
+  option_seed: 42
+  sampling_seed: 0
+  target_thinking: disabled
+  max_output_tokens: 65536
+  context_window: 131072
+  agent_timeout_seconds: 1800
+models:
+  target:
+    name: deepseek-v4-flash
+    thinking: disabled
+  optimizer:
+    name: kimi-k2.6
+    thinking: enabled
+    max_completion_tokens: 90000
+search:
+  initial_best: no_skill
+  initial_skill_for_reflection: src/skillopt/envs/livemath/skills/blank.md
+  max_candidates: 2
+  max_edits_per_candidate: 1
+  generation_token_budget: 500000
+  slow_update: false
+  meta_skill: false
+evaluation:
+  gate: official_harbor_exact_label
+  val_only: true
+  run_test: false
